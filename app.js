@@ -1,8 +1,3 @@
-
-/**
- * Module dependencies.
- */
-
 var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
@@ -12,7 +7,7 @@ var express = require('express')
   , jsdom = require('jsdom')
   , routes = require('./routes')
   , pg = require('pg')
-  , connectionString = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/template1'
+  , connectionString = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl'
   , client
   , query;
 
@@ -60,7 +55,7 @@ app.configure('development', function(){
 
 var currentRecord = ['78', '50', '14'];
 var bloop = new Date();
-// bloop.setSeconds(bloop.getSeconds() + 5);
+bloop.setSeconds(bloop.getSeconds() + 5);
 
 var cronJob = require('cron').CronJob;
 new cronJob(bloop, function(){
