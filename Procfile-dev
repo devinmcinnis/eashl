@@ -1,2 +1,2 @@
 web: ./node_modules/.bin/nodemon app.js
-stylus: ./node_modules/.bin/stylus --use nib --compress --watch stylus/main.styl --out public/css
+stylus: ./node_modules/.bin/stylus --use nib --compress --watch stylus/main.styl --out public/stylesheets
