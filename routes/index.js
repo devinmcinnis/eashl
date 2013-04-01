@@ -2,9 +2,9 @@ var stats  = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/memb
     games  = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/match-results?type=all',
     game_id = '';
 
-var request = require('request'),
-    jsdom = require('jsdom');
-
+var request = require('request')
+  , jsdom = require('jsdom');
+  
 exports.index = function(req, res){
   res.render('index', { title: 'EASHL PGF Stat Logger' });
 };
@@ -199,7 +199,17 @@ exports.fillStats = function (req, res) {
         });
       });
 
-      res.end();
+      var playerArr = [];
+
+      for (var player in self.team) {
+        playerArr.push(player);
+        for (var stat in self.team[player]) {
+          playerArr.push(parseInt(self.team[player][stat], 10));
+        }
+        // console.log(playerArr)
+        // client.query("INSERT INTO oldstats(player_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)", playerArr);
+        playerArr = [];
+      }
     });
   });
 }

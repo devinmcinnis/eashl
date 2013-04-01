@@ -1,26 +1,27 @@
 {
-  "name": "eashl-tracker",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node app"
+  "name"      : "eashl-tracker",
+  "version"   : "0.0.1",
+  "private"   : true,
+  "scripts"   : {
+    "start"   : "node app"
   },
   "engines": {
-    "node": "0.8.x",
-    "npm": "1.1.65"
+    "node"    : "0.8.x",
+    "npm"     : "1.1.65"
   },
   "dependencies": {
-    "express": "3.1.0",
-    "jade": "*",
-    "cron": "1.0.1",
-    "request": "2.14.0",
-    "jsdom": "0.5.1",
-    "time": "0.9.0",
-    "pg": "0.15.1"
+    "express" : "3.1.0",
+    "jade"    : "*",
+    "cron"    : "1.0.1",
+    "request" : "2.14.0",
+    "jsdom"   : "0.5.1",
+    "time"    : "0.9.0",
+    "pg"      : "0.15.1",
+    "orm"     : "2.0.6"
   },
   "devDependencies": {
-    "nib": "0.8.2",
-    "stylus": "*",
-    "nodemon": "~0.7.1"
+    "nib"     : "0.8.2",
+    "stylus"  : "*",
+    "nodemon" : "~0.7.1"
   }
 }

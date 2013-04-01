@@ -1,13 +1,14 @@
-var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , http = require('http')
-  , path = require('path')
-  , request = require('request')
-  , jsdom = require('jsdom')
-  , routes = require('./routes')
-  , pg = require('pg')
-  , connectionString = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl'
+var express  = require('express')
+  , app       = express()
+  , routes   = require('./routes')
+  , http     = require('http')
+  , path     = require('path')
+  , request  = require('request')
+  , jsdom    = require('jsdom')
+  , routes   = require('./routes')
+  , orm      = require('orm')
+  , pg       = require('pg')
+  , connectionString  = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl'
   , client
   , query;
 
@@ -18,7 +19,8 @@ client.connect();
 client.query("CREATE TEMP TABLE team(team_id varchar, name varchar)");
 client.query("CREATE TEMP TABLE game(game_id integer, team1_id varchar, team1_score integer, team2_id varchar, team2_score integer)");
 client.query("CREATE TEMP TABLE player(player_id integer, name varchar)");
-client.query("CREATE TEMP TABLE stats(player_id integer, game_id integer, goals integer, assists integer, points integer, plus_minus integer, pim integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, saves integer, save_p integer, so integer)");
+client.query("CREATE TEMP TABLE stats(player_id integer, game_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)");
+client.query("CREATE TEMP TABLE oldstats(player_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)");
 client.query("INSERT INTO team(team_id, name) values($1, $2)", ['224', 'Puck Goes First']);
 var query = client.query("SELECT * FROM team WHERE name = $1", ['Puck Goes First']);
 
@@ -33,8 +35,6 @@ query.on('row', function(row) {
 query.on('end', function() { 
   client.end();
 });
-
-var app = express();
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -61,8 +61,8 @@ var cronJob = require('cron').CronJob;
 new cronJob(bloop, function(){
 
   if ( typeof currentRecord != 'undefined' ) {
-    console.log('Checking to see if team has played a game..');
-    console.log('Team\'s current record is: ' + currentRecord.join('-')); }
+    console.log('Team\'s current record is: ' + currentRecord.join('-'));
+    console.log('Checking to see if team has played a game..'); }
 
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
 
@@ -101,7 +101,7 @@ new cronJob(bloop, function(){
 }, null, true);
 
 app.get('/', function(req, res) {
-
+  res.end('There is nothing here yet.');
 });
 
 http.createServer(app).listen(app.get('port'), function(){
