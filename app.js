@@ -6,45 +6,25 @@ var express  = require('express')
   , request  = require('request')
   , jsdom    = require('jsdom')
   , routes   = require('./routes')
-  , FastLegSBase = require('FastLegS')
+  , orm      = require('orm')
   , pg       = require('pg')
   , connectionString  = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl'
   , client
   , query;
 
-client = new pg.Client(connectionString);
-client.connect();
+app.use(orm.express(connectionString, {
+    define: function (db, models) {
 
-// Queries are queued and executed one after another once the connection becomes available
-client.query("CREATE TABLE team(team_id varchar, name varchar)");
-client.query("CREATE TABLE game(game_id integer, team1_id varchar, team1_score integer, team2_id varchar, team2_score integer)");
-client.query("CREATE TABLE player(player_id integer, name varchar)");
-client.query("CREATE TABLE stats(player_id integer, game_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)");
-client.query("CREATE TABLE oldstats(player_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)")
+        var callback = function(err, item) {
+          console.log(err);
+          console.log(item);
+        }
 
-var FastLegS = new FastLegSBase('pg');
-
-var connectionParams = {
-  user: 'eashl', password: 'eashl',
-  database: 'eashl', host: 'localhost', port: 5432
-}
-
-FastLegS.connect(connectionParams);
-
-var callback = function(err, results) {
-  console.dir(err);
-  console.dir(results);
-}
-
-var Team = FastLegS.Base.extend({
-  tableName: 'teams',
-  primaryKey: 'id'
-});
-
-Team.create({
-  team_id: 220,
-  name: 'Puck Goes First'
-}, callback)
+        db.load('models/models', function (err) {
+          if (err) return console.log(err);
+        })
+    }
+}));
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -63,9 +43,9 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var currentRecord = ['78', '50', '14'];
+var currentRecord = ['0', '0', '1'];
 var bloop = new Date();
-// bloop.setSeconds(bloop.getSeconds() + 5);
+bloop.setSeconds(bloop.getSeconds() + 2);
 
 var cronJob = require('cron').CronJob;
 new cronJob(bloop, function(){

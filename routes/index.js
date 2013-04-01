@@ -3,7 +3,9 @@ var stats  = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/memb
     game_id = '';
 
 var request = require('request')
-  , jsdom = require('jsdom');
+  , jsdom = require('jsdom')
+  , orm      = require('orm')
+  , connectionString  = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl';
   
 exports.index = function(req, res){
   res.render('index', { title: 'EASHL PGF Stat Logger' });
@@ -33,7 +35,7 @@ exports.getLatestGame = function (req, res) {
       $body = $('body #widgets > table > tbody > tr:first-child');
       gameId = $body.find('.match-details-button').attr('rel');
 
-      self.team.gameId = gameId;
+      self.gameId = gameId;
 
       return getPlayersOfLastGame();
 
@@ -41,7 +43,7 @@ exports.getLatestGame = function (req, res) {
   });
 
   function getPlayersOfLastGame() {
-    var game = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/match-results/details?match_id='+ self.team.gameId + '&type=all';
+    var game = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/match-results/details?match_id='+ self.gameId + '&type=all';
 
     console.log('Getting a list of the players that played in the last game...');
 
@@ -103,6 +105,7 @@ exports.getLatestGame = function (req, res) {
                 var statname = $row.find(stat).attr('title');
                 var $stat = $row.find(stat);
                 if ( $stat.index() > 2 ) {
+                  statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
                   self.team[playername][statname] = $stat.text();
                 }
               });
@@ -131,25 +134,25 @@ exports.getLatestGame = function (req, res) {
       function (err, window) {
       
         var $ = window.jQuery,
-        $body = $('body #widgets > table > tbody > tr:first-child'),
+        $body = $('#widgets thead + tbody > tr:first-child'),
         $opp = $body.find('.align-right.team'),
         game_score = $body.find('match-result-score').text().split('-'),
-        date = $body.find('.score .strong').text().split(' '),
-        time = date[1].split(':'),
+        date = $body.find('.align-center.strong div:last-child').text().split(' ');
+        var time = date[1].split(':'),
         hours = (date[2] === 'PM') ? time[0] : time[0] + 12;
 
-        self.team.date = new Date();
-        self.team.date.setHours(hours);
-        self.team.date.setMinutes(time[1]);
-        self.team.date.setSeconds('00');
+        self.date = new Date();
+        self.date.setHours(hours);
+        self.date.setMinutes(time[1]);
+        self.date.setSeconds('00');
 
         var reg = /^[a-z0-9]+$/gmi;
-        self.team.opp = {
+        self.opp = {
           name: $opp.find('a').text(),
           url: $opp.find('a').attr('href')
         }
         $opp.find('a').remove();
-        self.team.opp['abbr'] = $opp.find('div').text().replace(/\W/g, '');
+        self.opp['abbr'] = $opp.find('div').text().replace(/\W/g, '');
 
         logResults();
       });
@@ -157,8 +160,45 @@ exports.getLatestGame = function (req, res) {
   }
 
   function logResults() {
-    console.log('Results of the last game played:')
-    console.log(self.team);
+    // console.log('Results of the last game played:')
+    // console.log(self);
+
+    orm.connect(connectionString, function(err, db) {
+      db.load('./models/models', function (err) {
+        if (err) console.log(err);
+
+        var oldstat = db.models.oldstats;
+        var newstat = db.models.stats;
+
+        for (var player in self.team) {
+          oldstat.find({name: player}, function (err, person) {
+            
+            var newPlayerStat = {
+              name: person[0].name
+            };
+
+            for (var stat in self.team[player]) {
+              newPlayerStat[stat] = self.team[person[0].name][stat] - person[0][stat];
+            }
+
+            newPlayerStat.shootingpercentage = (newPlayerStat.goals === 0) ? 0 : ((newPlayerStat.goals / newPlayerStat.shots) * 100).toFixed(2);
+
+            newPlayerStat.savepercentage = (newPlayerStat.savepercentage === 0) ? 0 : (((newPlayerStat.totalgoalsagainst + newPlayerStat.saves) / newPlayerStat.shots)).toFixed(3);
+
+            newPlayerStat['date_played'] = self.date + '';
+
+            newstat.create([newPlayerStat], function (err, item) {
+              console.log(err);
+              console.log(item);
+            });
+            
+            newPlayerStat = {};
+
+          });
+        }
+      });
+    });
+    console.log('Complete');
   }
 
 };
@@ -194,22 +234,32 @@ exports.fillStats = function (req, res) {
           var statname = $row.find(stat).attr('title');
           var $stat = $row.find(stat);
           if ( $stat.index() > 2 ) {
+            statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
             self.team[playername][statname] = $stat.text();
           }
         });
       });
 
-      var playerArr = [];
+      orm.connect(connectionString, function(err, db) {
+        db.load('./models/models', function (err) {
+          if (err) console.log(err);
+          
+          var oldstat = db.models.oldstats;
+          var playerObj = {};
 
-      for (var player in self.team) {
-        playerArr.push(player);
-        for (var stat in self.team[player]) {
-          playerArr.push(parseInt(self.team[player][stat], 10));
-        }
-        // console.log(playerArr)
-        // client.query("INSERT INTO oldstats(player_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)", playerArr);
-        playerArr = [];
-      }
+          for (var player in self.team) {
+            playerObj.name = player;
+            for (var stat in self.team[player]) {
+              statname = stat.toLowerCase().replace(/[^0-9a-z-]/g,"");
+              playerObj[statname] = parseFloat(self.team[player][stat], 10);
+            }
+            oldstat.create([playerObj], function (err, item) {
+              console.log(item);
+            });
+            playerObj = {};
+          }
+        });
+      });
     });
   });
 }
