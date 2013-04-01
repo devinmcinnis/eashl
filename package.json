@@ -10,14 +10,14 @@
     "npm"     : "1.1.65"
   },
   "dependencies": {
-    "express" : "3.1.0",
-    "jade"    : "*",
-    "cron"    : "1.0.1",
-    "request" : "2.14.0",
-    "jsdom"   : "0.5.1",
-    "time"    : "0.9.0",
-    "pg"      : "0.15.1",
-    "orm"     : "2.0.6"
+    "express"   : "3.1.0",
+    "jade"      : "*",
+    "cron"      : "1.0.1",
+    "request"   : "2.14.0",
+    "jsdom"     : "0.5.1",
+    "time"      : "0.9.0",
+    "pg"        : "0.15.1",
+    "FastLegS" : "0.3.4"    
   },
   "devDependencies": {
     "nib"     : "0.8.2",

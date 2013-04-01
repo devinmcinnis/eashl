@@ -1,12 +1,12 @@
 var express  = require('express')
-  , app       = express()
+  , app      = express()
   , routes   = require('./routes')
   , http     = require('http')
   , path     = require('path')
   , request  = require('request')
   , jsdom    = require('jsdom')
   , routes   = require('./routes')
-  , orm      = require('orm')
+  , FastLegSBase = require('FastLegS')
   , pg       = require('pg')
   , connectionString  = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl'
   , client
@@ -16,25 +16,35 @@ client = new pg.Client(connectionString);
 client.connect();
 
 // Queries are queued and executed one after another once the connection becomes available
-client.query("CREATE TEMP TABLE team(team_id varchar, name varchar)");
-client.query("CREATE TEMP TABLE game(game_id integer, team1_id varchar, team1_score integer, team2_id varchar, team2_score integer)");
-client.query("CREATE TEMP TABLE player(player_id integer, name varchar)");
-client.query("CREATE TEMP TABLE stats(player_id integer, game_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)");
-client.query("CREATE TEMP TABLE oldstats(player_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)");
-client.query("INSERT INTO team(team_id, name) values($1, $2)", ['224', 'Puck Goes First']);
-var query = client.query("SELECT * FROM team WHERE name = $1", ['Puck Goes First']);
+client.query("CREATE TABLE team(team_id varchar, name varchar)");
+client.query("CREATE TABLE game(game_id integer, team1_id varchar, team1_score integer, team2_id varchar, team2_score integer)");
+client.query("CREATE TABLE player(player_id integer, name varchar)");
+client.query("CREATE TABLE stats(player_id integer, game_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)");
+client.query("CREATE TABLE oldstats(player_id integer, goals integer, assists integer, points integer, plus_minus integer, pims integer, ppg integer, shg integer, total_hits integer, bs integer, shots integer, shooting_p integer, gaa integer, ga integer, saves integer, save_p integer, so integer)")
 
-// Can stream row results back 1 at a time
-query.on('row', function(row) {
-  console.log(row);
-  console.log("Team name is " + row.name);
-  console.log("Team ID is " + row.team_id);
+var FastLegS = new FastLegSBase('pg');
+
+var connectionParams = {
+  user: 'eashl', password: 'eashl',
+  database: 'eashl', host: 'localhost', port: 5432
+}
+
+FastLegS.connect(connectionParams);
+
+var callback = function(err, results) {
+  console.dir(err);
+  console.dir(results);
+}
+
+var Team = FastLegS.Base.extend({
+  tableName: 'teams',
+  primaryKey: 'id'
 });
 
-// Fired after last row is emitted
-query.on('end', function() { 
-  client.end();
-});
+Team.create({
+  team_id: 220,
+  name: 'Puck Goes First'
+}, callback)
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -55,7 +65,7 @@ app.configure('development', function(){
 
 var currentRecord = ['78', '50', '14'];
 var bloop = new Date();
-bloop.setSeconds(bloop.getSeconds() + 5);
+// bloop.setSeconds(bloop.getSeconds() + 5);
 
 var cronJob = require('cron').CronJob;
 new cronJob(bloop, function(){
@@ -100,9 +110,7 @@ new cronJob(bloop, function(){
   });
 }, null, true);
 
-app.get('/', function(req, res) {
-  res.end('There is nothing here yet.');
-});
+app.get('/', routes.index);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
