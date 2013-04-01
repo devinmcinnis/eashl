@@ -1,5 +1,7 @@
 var express  = require('express')
   , app      = express()
+  , api_env = app.get('env')
+  , configs  = require('./config')(api_env)
   , routes   = require('./routes')
   , http     = require('http')
   , path     = require('path')
@@ -8,11 +10,10 @@ var express  = require('express')
   , routes   = require('./routes')
   , orm      = require('orm')
   , pg       = require('pg')
-  , connectionString  = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl'
   , client
   , query;
 
-app.use(orm.express(connectionString, {
+app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {
 
         var callback = function(err, item) {

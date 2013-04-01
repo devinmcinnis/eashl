@@ -17,7 +17,7 @@
     "jsdom"     : "0.5.1",
     "time"      : "0.9.0",
     "pg"        : "0.15.1",
-    "FastLegS" : "0.3.4"    
+    "orm"       : "2.0.6"    
   },
   "devDependencies": {
     "nib"     : "0.8.2",

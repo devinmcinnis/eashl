@@ -3,9 +3,12 @@ var stats  = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/memb
     game_id = '';
 
 var request = require('request')
+    express = require('express')
+  , app     = express()
+  , api_env = app.get('env')
   , jsdom = require('jsdom')
   , orm      = require('orm')
-  , connectionString  = process.env.DATABASE_URL || 'postgres://eashl:eashl@localhost/eashl';
+  , configs  = require('../config')(api_env);
   
 exports.index = function(req, res){
   res.render('index', { title: 'EASHL PGF Stat Logger' });
@@ -163,7 +166,7 @@ exports.getLatestGame = function (req, res) {
     // console.log('Results of the last game played:')
     // console.log(self);
 
-    orm.connect(connectionString, function(err, db) {
+    orm.connect(configs.postgres.url, function(err, db) {
       db.load('./models/models', function (err) {
         if (err) console.log(err);
 
