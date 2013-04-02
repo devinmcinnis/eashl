@@ -1,29 +1,36 @@
 var express  = require('express')
-  , app      = express()
-  , api_env = app.get('env')
-  , configs  = require('./config')(api_env)
   , routes   = require('./routes')
   , http     = require('http')
   , path     = require('path')
   , request  = require('request')
   , jsdom    = require('jsdom')
   , routes   = require('./routes')
+  , cronJob  = require('cron').CronJob
   , orm      = require('orm')
   , pg       = require('pg')
-  , client
-  , query;
+  , app      = express()
+  , api_env  = app.get('env')
+  , configs  = require('./config')(api_env);
 
 app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {
+      var cb = function(err, item) {
+        if (err) { console.log(err); }
+        if (item) { console.log(item); }
+      }
 
-        var callback = function(err, item) {
-          console.log(err);
-          console.log(item);
-        }
+      db.load('models/models', function (err, item) {
+        cb(err, item);
 
-        db.load('models/models', function (err) {
-          if (err) return console.log(err);
-        })
+        var Oldstats = db.models.oldstats;
+        Oldstats.count({}, function (err, count) {
+          cb(err, item);
+          if (count < 1) {
+            routes.fillStats();
+          }
+        });
+
+      });
     }
 }));
 
@@ -48,8 +55,8 @@ var currentRecord = ['0', '0', '1'];
 var bloop = new Date();
 bloop.setSeconds(bloop.getSeconds() + 2);
 
-var cronJob = require('cron').CronJob;
-new cronJob(bloop, function(){
+new cronJob('0 */20 * * * *', function(){
+// new cronJob(bloop, function(){
 
   if ( typeof currentRecord != 'undefined' ) {
     console.log('Team\'s current record is: ' + currentRecord.join('-'));

@@ -19,6 +19,7 @@ exports.getLatestGame = function (req, res) {
   var self = this,
       game_players = [];
       self.team = {};
+      self.game = {};
 
   console.log('Searching easportsworld.com for the ID of the most recent game played...');
   console.log('This may take a minute or so.');
@@ -38,7 +39,7 @@ exports.getLatestGame = function (req, res) {
       $body = $('body #widgets > table > tbody > tr:first-child');
       gameId = $body.find('.match-details-button').attr('rel');
 
-      self.gameId = gameId;
+      self.game.game_id = gameId + '';
 
       return getPlayersOfLastGame();
 
@@ -46,7 +47,7 @@ exports.getLatestGame = function (req, res) {
   });
 
   function getPlayersOfLastGame() {
-    var game = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/match-results/details?match_id='+ self.gameId + '&type=all';
+    var game = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/match-results/details?match_id='+ self.game.game_id + '&type=all';
 
     console.log('Getting a list of the players that played in the last game...');
 
@@ -65,7 +66,7 @@ exports.getLatestGame = function (req, res) {
         var $ = window.jQuery,
         $body = $('body'),
         players = $body.find('.yui-u.first tr > th > div > a');
-        // console.log(players);
+
         players.each(function() {
           game_players.push($(this).text());
         });
@@ -139,7 +140,7 @@ exports.getLatestGame = function (req, res) {
         var $ = window.jQuery,
         $body = $('#widgets thead + tbody > tr:first-child'),
         $opp = $body.find('.align-right.team'),
-        game_score = $body.find('match-result-score').text().split('-'),
+        game_score = $body.find('.match-result-score').text().split('-'),
         date = $body.find('.align-center.strong div:last-child').text().split(' ');
         var time = date[1].split(':'),
         hours = (date[2] === 'PM') ? time[0] : time[0] + 12;
@@ -150,12 +151,19 @@ exports.getLatestGame = function (req, res) {
         self.date.setSeconds('00');
 
         var reg = /^[a-z0-9]+$/gmi;
-        self.opp = {
-          name: $opp.find('a').text(),
-          url: $opp.find('a').attr('href')
-        }
+        self.game.team2_name = $opp.find('a').text();
+        self.game.team2_id = parseInt($opp.find('a').attr('href').split('/')[4], 10);
+
         $opp.find('a').remove();
-        self.opp['abbr'] = $opp.find('div').text().replace(/\W/g, '');
+        self.game.team2_abbr = $opp.find('div').text().replace(/\W/g, '');
+        self.game.team2_score = parseInt(game_score[1]);
+
+        self.game.team1_name = 'Puck Goes First';
+        self.game.team1_id = 224;
+        self.game.team1_score = parseInt(game_score[0]);
+        self.game.team1_abbr = 'PGF';
+
+        self.game.date = self.date + '';
 
         logResults();
       });
@@ -172,6 +180,11 @@ exports.getLatestGame = function (req, res) {
 
         var oldstat = db.models.oldstats;
         var newstat = db.models.stats;
+        var Game = db.models.games;
+
+        Game.create([self.game], function (err, item) {
+          if (err) console.log(err);
+        });
 
         for (var player in self.team) {
           oldstat.find({name: player}, function (err, person) {
@@ -190,9 +203,9 @@ exports.getLatestGame = function (req, res) {
 
             newPlayerStat['date_played'] = self.date + '';
 
-            newstat.create([newPlayerStat], function (err, item) {
-              console.log(err);
-              console.log(item);
+            newstat.create([newPlayerStat], 
+              function (err, item) {
+              if (err) console.log(err);
             });
             
             newPlayerStat = {};
@@ -201,9 +214,7 @@ exports.getLatestGame = function (req, res) {
         }
       });
     });
-    console.log('Complete');
   }
-
 };
 
 exports.fillStats = function (req, res) {

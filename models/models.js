@@ -10,10 +10,16 @@ module.exports = function (db, cb) {
   }).sync();
 
   db.define("games", {
-    game_id   : Number,
-    team1_id  : Number,
-    team2_id  : Number,
-    date      : String
+    game_id     : String,
+    team1_id    : Number,
+    team1_name  : String,
+    team1_abbr  : String,
+    team1_score : Number,
+    team2_id    : Number,
+    team2_name  : String,
+    team2_abbr  : String,
+    team2_score : Number,
+    date        : String
   }).sync();
 
   db.define("stats", {
