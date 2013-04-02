@@ -5,6 +5,14 @@ module.exports = function (db, cb) {
     abbr        : String
   }).sync();
 
+  db.define("records", {
+    team_id     : Number,
+    name        : String,
+    wins        : Number,
+    losses      : Number,
+    otl        : Number
+  }).sync();
+
   db.define("players", {
     name        : String
   }).sync();

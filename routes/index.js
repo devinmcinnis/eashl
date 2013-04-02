@@ -212,6 +212,9 @@ exports.getLatestGame = function (req, res) {
 
           });
         }
+
+        exports.fillStats();
+        console.log('Stat collection complete.');
       });
     });
   }
@@ -219,8 +222,8 @@ exports.getLatestGame = function (req, res) {
 
 exports.fillStats = function (req, res) {
 
-  var self = this;
-      self.team = {};
+  var team = this;
+      team.oldstats = {};
 
   request({uri: stats}, function (err, response, body) {
     // Basic error check
@@ -242,14 +245,14 @@ exports.fillStats = function (req, res) {
         var $row = $(row);
         var playername = $(row).find('td:nth-child(2) a').text();
 
-        self.team[playername] = {};
+        team.oldstats[playername] = {};
 
         $category.each(function (i, stat) {
           var statname = $row.find(stat).attr('title');
           var $stat = $row.find(stat);
           if ( $stat.index() > 2 ) {
             statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
-            self.team[playername][statname] = $stat.text();
+            team.oldstats[playername][statname] = $stat.text();
           }
         });
       });
@@ -259,16 +262,19 @@ exports.fillStats = function (req, res) {
           if (err) console.log(err);
           
           var oldstat = db.models.oldstats;
+              oldstat.find({}).remove(function (err) {
+                if (err) console.log(err);
+              });
           var playerObj = {};
 
-          for (var player in self.team) {
+          for (var player in team.oldstats) {
             playerObj.name = player;
-            for (var stat in self.team[player]) {
+            for (var stat in team.oldstats[player]) {
               statname = stat.toLowerCase().replace(/[^0-9a-z-]/g,"");
-              playerObj[statname] = parseFloat(self.team[player][stat], 10);
+              playerObj[statname] = parseFloat(team.oldstats[player][stat], 10);
             }
             oldstat.create([playerObj], function (err, item) {
-              console.log(item);
+              if (err) console.log(err)
             });
             playerObj = {};
           }

@@ -10,7 +10,8 @@ var express  = require('express')
   , pg       = require('pg')
   , app      = express()
   , api_env  = app.get('env')
-  , configs  = require('./config')(api_env);
+  , configs  = require('./config')(api_env)
+  , currentRecord = [];
 
 app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {
@@ -22,11 +23,42 @@ app.use(orm.express(configs.postgres.url, {
       db.load('models/models', function (err, item) {
         cb(err, item);
 
-        var Oldstats = db.models.oldstats;
-        Oldstats.count({}, function (err, count) {
-          cb(err, item);
-          if (count < 1) {
-            routes.fillStats();
+        var Oldstats  = db.models.oldstats;
+        var Record    = db.models.records;
+
+        // If "oldstats" table has nothing inside of it, get the current total stats for every player
+        // Oldstats.find({}, function (err, count) {
+        //   cb(err, item);
+        //   if (count.length < 1) {
+        //     routes.fillStats();
+        //   }
+        // });
+
+        Record.find({team_id: 224}, function (err, exists) {
+          if (exists.length < 1) {
+
+            Record.create([{
+              team_id: 224,
+              name: 'Puck Goes First',
+              wins: 3,
+              losses: 3,
+              otl: 0
+            }], function (err, team) {
+              currentRecord.push(team[0].wins);
+              currentRecord.push(team[0].losses);
+              currentRecord.push(team[0].otl);
+              db.close();
+            });
+
+          } else {
+
+            Record.find({team_id: 224}, function (err, team) {
+              currentRecord.push(team[0].wins);
+              currentRecord.push(team[0].losses);
+              currentRecord.push(team[0].otl);
+              db.close();
+            });
+
           }
         });
 
@@ -51,11 +83,12 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var currentRecord = ['1', '1', '0'];
 // var bloop = new Date();
 // bloop.setSeconds(bloop.getSeconds() + 10);
 
 new cronJob(configs.timer, function(){
+
+  request({uri: 'http://eashl.herokuapp.com'}, function () {});
 
   if ( typeof currentRecord != 'undefined' ) {
     console.log('Team\'s current record is: ' + currentRecord.join('-'));
@@ -86,6 +119,24 @@ new cronJob(configs.timer, function(){
 
         if ( record[key] != currentRecord[key] && currentRecord.length > 2 ) {
           console.log('Team\'s new record is: ' + record.join('-'));
+
+          orm.connect(configs.postgres.url, function(err, db) {
+            db.load('./models/models', function (err) {
+              if (err) console.log(err);
+
+              var Record = db.models.records;
+              Record.find({team_id: 224}).each(function (team) {
+                team.wins = record[0];
+                team.losses = record[1];
+                team.ties = record [2];
+              }).save(function (err) {
+                if (err) console.log(err);
+                db.close();
+              });
+
+            });
+          });
+
           routes.getLatestGame();
         } else {
           return;
