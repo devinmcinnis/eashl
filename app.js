@@ -51,12 +51,9 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var currentRecord = ['0', '0', '1'];
-var bloop = new Date();
-bloop.setSeconds(bloop.getSeconds() + 2);
+// var currentRecord = ['0', '0', '0'];
 
-new cronJob('0 */20 * * * *', function(){
-// new cronJob(bloop, function(){
+new cronJob(configs.timer, function(){
 
   if ( typeof currentRecord != 'undefined' ) {
     console.log('Team\'s current record is: ' + currentRecord.join('-'));
@@ -78,12 +75,15 @@ new cronJob('0 */20 * * * *', function(){
       $body = $('body .current-season-club-stats-main-container'),
       record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
 
+      if (typeof currentRecord === 'undefined') {
+        console.log('Created team record of: ' + record.join('-'));
+        return;
+      }
+
       // For each part of record (wins-losses-ties), check against teams current record and get the game stats from the most recently played game if it's different
       record.map(function (callback, key) {
 
-        if (typeof currentRecord === 'undefined') {
-          console.log('Created team record of: ' + record.join('-'));
-        } else if ( record[key] != currentRecord[key] && currentRecord.length > 2 ) {
+        if ( record[key] != currentRecord[key] && currentRecord.length > 2 ) {
           console.log('Team\'s new record is: ' + record.join('-'));
           routes.getLatestGame();
         } else {
