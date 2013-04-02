@@ -51,7 +51,7 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var currentRecord = ['0', '1', '0'];
+var currentRecord = ['1', '1', '0'];
 var bloop = new Date();
 bloop.setSeconds(bloop.getSeconds() + 10);
 
