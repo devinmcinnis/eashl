@@ -52,8 +52,10 @@ app.configure('development', function(){
 });
 
 var currentRecord = ['0', '0', '0'];
+var bloop = new Date();
+bloop.setSeconds(bloop.getSeconds() + 10);
 
-new cronJob(configs.timer, function(){
+new cronJob(bloop, function(){
 
   if ( typeof currentRecord != 'undefined' ) {
     console.log('Team\'s current record is: ' + currentRecord.join('-'));
