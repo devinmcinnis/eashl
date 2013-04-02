@@ -254,7 +254,7 @@ exports.fillStats = function (req, res) {
         });
       });
 
-      orm.connect(connectionString, function(err, db) {
+      orm.connect(configs.postgres.url, function(err, db) {
         db.load('./models/models', function (err) {
           if (err) console.log(err);
           
