@@ -51,7 +51,7 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-// var currentRecord = ['0', '0', '0'];
+var currentRecord = ['0', '0', '0'];
 
 new cronJob(configs.timer, function(){
 
@@ -62,8 +62,8 @@ new cronJob(configs.timer, function(){
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
 
   request({uri: teamRecord}, function (err, response, body) {
-    // Basic error check
-    if ( err && response.statusCode != 200 ) {console.log('Request error.')}
+    if ( err && response.statusCode != 200 ) {console.log('Request error.');}
+
     // Send the body parameter as the HTML code we will parse in jsdom
     // Also, tell jsdom to attach jQuery in the scripts
     jsdom.env({
@@ -77,7 +77,6 @@ new cronJob(configs.timer, function(){
 
       if (typeof currentRecord === 'undefined') {
         console.log('Created team record of: ' + record.join('-'));
-        return;
       }
 
       // For each part of record (wins-losses-ties), check against teams current record and get the game stats from the most recently played game if it's different

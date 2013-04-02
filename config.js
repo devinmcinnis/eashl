@@ -16,7 +16,7 @@ module.exports = function(env) {
     obj.postgres.url = process.env.HEROKU_POSTGRESQL_TEAL_URL;
 
     // Don't start cron job right away but have it run every 20 minutes
-    obj.timer = '0 */20 * * * *';
+    obj.timer = '0 */15 * * * *';
   }
 
   return obj;
