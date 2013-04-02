@@ -52,8 +52,8 @@ app.configure('development', function(){
 });
 
 var currentRecord = ['1', '1', '0'];
-var bloop = new Date();
-bloop.setSeconds(bloop.getSeconds() + 10);
+// var bloop = new Date();
+// bloop.setSeconds(bloop.getSeconds() + 10);
 
 new cronJob(configs.timer, function(){
 
