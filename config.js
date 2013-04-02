@@ -13,7 +13,7 @@ module.exports = function(env) {
     obj.timer.setSeconds(obj.timer.getSeconds() + 3);
 
   } else if (env == 'staging' || env == 'production') {
-    obj.postgres.url = HEROKU_POSTGRESQL_TEAL_URL;
+    obj.postgres.url = process.env.HEROKU_POSTGRESQL_TEAL_URL;
 
     // Don't start cron job right away but have it run every 20 minutes
     obj.timer = '0 */20 * * * *';
