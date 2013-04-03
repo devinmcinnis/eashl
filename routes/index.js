@@ -6,15 +6,15 @@ var request = require('request')
     express = require('express')
   , app     = express()
   , api_env = app.get('env')
-  , jsdom = require('jsdom')
-  , orm      = require('orm')
-  , configs  = require('../config')(api_env);
+  , jsdom   = require('jsdom')
+  , orm     = require('orm')
+  , configs = require('../config')(api_env);
   
 exports.index = function(req, res){
   res.render('index', { title: 'EASHL PGF Stat Logger' });
 };
 
-exports.getLatestGame = function (req, res) {
+exports.getLatestGame = function (record) {
 
   var self = this,
       game_players = [];
@@ -22,7 +22,7 @@ exports.getLatestGame = function (req, res) {
       self.game = {};
 
   console.log('Searching easportsworld.com for the ID of the most recent game played...');
-  console.log('This may take a minute or so.');
+  // console.log('This may take a minute or so.');
   
   request({uri: games}, function (err, response, body) {
     // Basic error check
@@ -31,7 +31,7 @@ exports.getLatestGame = function (req, res) {
     // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
     jsdom.env({
       html: body,
-      scripts: ['http://code.jquery.com/jquery-1.6.min.js']
+      scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
     },
     function (err, window) {
     
@@ -41,7 +41,8 @@ exports.getLatestGame = function (req, res) {
 
       self.game.game_id = gameId + '';
 
-      return getPlayersOfLastGame();
+      getPlayersOfLastGame();
+      return window.close();
 
     });
   });
@@ -49,7 +50,7 @@ exports.getLatestGame = function (req, res) {
   function getPlayersOfLastGame() {
     var game = 'http://www.easportsworld.com/en_US/clubs/partial/401A0001/224/match-results/details?match_id='+ self.game.game_id + '&type=all';
 
-    console.log('Getting a list of the players that played in the last game...');
+    // console.log('Getting a list of the players that played in the last game...');
 
     // Tell the request that we want to fetch eashl.com, send the restuls to a function
     request({uri: game}, function (err, response, body) {
@@ -59,7 +60,7 @@ exports.getLatestGame = function (req, res) {
       // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
       jsdom.env({
         html: body,
-        scripts: ['http://code.jquery.com/jquery-1.6.min.js']
+        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
       },
       function (err, window) {
         // Use jQuery just as in regular HTML
@@ -71,14 +72,15 @@ exports.getLatestGame = function (req, res) {
           game_players.push($(this).text());
         });
 
-        return getPlayerStatsOfLastGame();
+        getPlayerStatsOfLastGame();
+        return window.close();
       });
     });
   }
 
   function getPlayerStatsOfLastGame() {
 
-    console.log('Getting the stats of the players in the last game...');
+    // console.log('Getting the stats of the players in the last game...');
 
     // Tell the request that we want to fetch eashl.com, send the restuls to a function
     request({uri: stats}, function (err, response, body) {
@@ -88,7 +90,7 @@ exports.getLatestGame = function (req, res) {
       // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
       jsdom.env({
         html: body,
-        scripts: ['http://code.jquery.com/jquery-1.6.min.js']
+        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
       },
       function (err, window) {
         // Use jQuery just as in regular HTML
@@ -118,13 +120,14 @@ exports.getLatestGame = function (req, res) {
         });
 
         getGameInfoOfLastGame();
+        return window.close();
       });
     });
   }
 
   function getGameInfoOfLastGame() {
 
-    console.log('Getting game information of the most recent game played...');
+    // console.log('Getting game information of the most recent game played...');
 
     request({uri: games}, function (err, response, body) {
       // Basic error check
@@ -133,17 +136,18 @@ exports.getLatestGame = function (req, res) {
       // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
       jsdom.env({
         html: body,
-        scripts: ['http://code.jquery.com/jquery-1.6.min.js']
+        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
       },
       function (err, window) {
       
-        var $ = window.jQuery,
-        $body = $('#widgets thead + tbody > tr:first-child'),
+        var $ = window.$ || window.jQuery,
+        $body = $('tbody tr:first-child tbody .black:first-child'),
         $opp = $body.find('.align-right.team'),
         game_score = $body.find('.match-result-score').text().split('-'),
         date = $body.find('.align-center.strong div:last-child').text().split(' ');
-        var time = date[1].split(':'),
-        hours = (date[2] === 'PM') ? time[0] : time[0] + 12;
+
+        var time = parseInt(date[1], 10);
+        var hours = (date[2] === 'PM') ? time[0] : time[0] + 12;
 
         self.date = new Date();
         self.date.setHours(hours);
@@ -166,6 +170,8 @@ exports.getLatestGame = function (req, res) {
         self.game.date = self.date + '';
 
         logResults();
+
+        return window.close();
       });
     }); 
   }
@@ -213,14 +219,14 @@ exports.getLatestGame = function (req, res) {
           });
         }
 
-        exports.fillStats();
+        exports.fillStats(record);
         console.log('Stat collection complete.');
       });
     });
   }
 };
 
-exports.fillStats = function (req, res) {
+exports.fillStats = function (record) {
 
   var team = this;
       team.oldstats = {};
@@ -232,7 +238,7 @@ exports.fillStats = function (req, res) {
     // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
     jsdom.env({
       html: body,
-      scripts: ['http://code.jquery.com/jquery-1.6.min.js']
+      scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
     },
     function (err, window) {
       // Use jQuery just as in regular HTML
@@ -257,7 +263,7 @@ exports.fillStats = function (req, res) {
         });
       });
 
-      orm.connect(configs.postgres.url, function(err, db) {
+      return orm.connect(configs.postgres.url, function(err, db) {
         db.load('./models/models', function (err) {
           if (err) console.log(err);
           
@@ -278,6 +284,19 @@ exports.fillStats = function (req, res) {
             });
             playerObj = {};
           }
+
+          // Update records tables in database
+          var Record = db.models.records;
+          Record.find({team_id: 224}).each(function (team) {
+            team.wins = record[0];
+            team.losses = record[1];
+            team.ties = record [2];
+          }).save(function (err) {
+            if (err) console.log(err);
+            console.log('Updated record');
+            window.close();
+            db.close();
+          });
         });
       });
     });

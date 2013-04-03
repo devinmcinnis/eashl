@@ -5,13 +5,15 @@ var express  = require('express')
   , request  = require('request')
   , jsdom    = require('jsdom')
   , routes   = require('./routes')
+  , fs       = require('fs')
   , cronJob  = require('cron').CronJob
   , orm      = require('orm')
   , pg       = require('pg')
   , app      = express()
   , api_env  = app.get('env')
   , configs  = require('./config')(api_env)
-  , currentRecord = [];
+  , currentRecord = []
+  , jquery   = fs.readFileSync("./public/javascripts/jquery.min.js");
 
 app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {
@@ -40,8 +42,8 @@ app.use(orm.express(configs.postgres.url, {
             Record.create([{
               team_id: 224,
               name: 'Puck Goes First',
-              wins: 4,
-              losses: 3,
+              wins: 6,
+              losses: 5,
               otl: 0
             }], function (err, team) {
               currentRecord.push(team[0].wins);
@@ -103,11 +105,12 @@ new cronJob(configs.timer, function(){
     // Also, tell jsdom to attach jQuery in the scripts
     jsdom.env({
       html: body,
-      scripts: ['http://code.jquery.com/jquery-1.6.min.js']
+      scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
+      // scripts: [jquery]
     },
     function (err, window) {
-      var $ = window.jQuery,
-      $body = $('body .current-season-club-stats-main-container'),
+      var $ = window.$ || window.jQuery;
+      var $body = $('body .current-season-club-stats-main-container'),
       record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
 
       if (typeof currentRecord === 'undefined') {
@@ -115,36 +118,19 @@ new cronJob(configs.timer, function(){
       }
 
       // For each part of record (wins-losses-ties), check against teams current record and get the game stats from the most recently played game if it's different
-      record.map(function (callback, key) {
-
-        if ( record[key] != currentRecord[key] && currentRecord.length > 2 ) {
+      for (var i = 0, rLen = record.length; i < rLen; i += 1) {
+        if ( record[i] != currentRecord[i] && currentRecord.length > 2 ) {
           console.log('Team\'s new record is: ' + record.join('-'));
-
-          orm.connect(configs.postgres.url, function(err, db) {
-            db.load('./models/models', function (err) {
-              if (err) console.log(err);
-
-              var Record = db.models.records;
-              Record.find({team_id: 224}).each(function (team) {
-                team.wins = record[0];
-                team.losses = record[1];
-                team.ties = record [2];
-              }).save(function (err) {
-                if (err) console.log(err);
-                db.close();
-              });
-
-            });
-          });
-
-          routes.getLatestGame();
+          routes.getLatestGame(record);
+          break;
         } else {
           return;
         }
+      }
 
-      });
+      currentRecord = record;
 
-      return currentRecord = record;
+      return window.close();
 
     });
   });
