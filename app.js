@@ -40,7 +40,7 @@ app.use(orm.express(configs.postgres.url, {
             Record.create([{
               team_id: 224,
               name: 'Puck Goes First',
-              wins: 3,
+              wins: 4,
               losses: 3,
               otl: 0
             }], function (err, team) {
