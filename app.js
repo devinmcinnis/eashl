@@ -112,18 +112,11 @@ new cronJob(configs.timer, function(){
       var $body = $('body .current-season-club-stats-main-container'),
       record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
 
-      if (typeof currentRecord === 'undefined') {
-        console.log('Created team record of: ' + record.join('-'));
-      }
-
       // For each part of record (wins-losses-ties), check against teams current record and get the game stats from the most recently played game if it's different
       for (var i = 0, rLen = record.length; i < rLen; i += 1) {
         if ( record[i] != currentRecord[i] && currentRecord.length > 2 ) {
           console.log('Team\'s new record is: ' + record.join('-'));
           routes.getLatestGame(record);
-          break;
-        } else {
-          return;
         }
       }
 

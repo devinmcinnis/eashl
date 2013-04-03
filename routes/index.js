@@ -21,7 +21,7 @@ exports.getLatestGame = function (record) {
       self.team = {};
       self.game = {};
 
-  console.log('Searching easportsworld.com for the ID of the most recent game played...');
+  console.log('Getting the latest game information..');
   // console.log('This may take a minute or so.');
   
   request({uri: games}, function (err, response, body) {
