@@ -12,8 +12,7 @@ var express  = require('express')
   , app      = express()
   , api_env  = app.get('env')
   , configs  = require('./config')(api_env)
-  , currentRecord = []
-  , jquery   = fs.readFileSync("./public/javascripts/jquery.min.js");
+  , currentRecord = [];
 
 app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {

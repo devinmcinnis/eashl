@@ -35,7 +35,7 @@ exports.getLatestGame = function (record) {
     },
     function (err, window) {
     
-      var $ = window.jQuery,
+      var $ = window.$ || window.jQuery,
       $body = $('body #widgets > table > tbody > tr:first-child');
       gameId = $body.find('.match-details-button').attr('rel');
 
@@ -64,7 +64,7 @@ exports.getLatestGame = function (record) {
       },
       function (err, window) {
         // Use jQuery just as in regular HTML
-        var $ = window.jQuery,
+        var $ = window.$ || window.jQuery,
         $body = $('body'),
         players = $body.find('.yui-u.first tr > th > div > a');
 
@@ -94,7 +94,7 @@ exports.getLatestGame = function (record) {
       },
       function (err, window) {
         // Use jQuery just as in regular HTML
-        var $ = window.jQuery,
+        var $ = window.$ || window.jQuery,
         $body = $('body'),
         $player = $body.find('tbody tr'),
         $category = $player.find('td');
@@ -242,7 +242,7 @@ exports.fillStats = function (record) {
     },
     function (err, window) {
       // Use jQuery just as in regular HTML
-      var $ = window.jQuery,
+      var $ = window.$ || window.jQuery,
       $body = $('body'),
       $player = $body.find('tbody tr'),
       $category = $player.find('td');
