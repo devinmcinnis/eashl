@@ -27,12 +27,12 @@ module.exports = function (db, cb) {
     team2_name  : String,
     team2_abbr  : String,
     team2_score : Number,
-    date        : String
+    date        : Date
   }).sync();
 
   db.define("stats", {
     name              : String,
-    date_played       : String,
+    date_played       : Date,
     game_id           : Number,
     goals             : Number,
     assists           : Number,

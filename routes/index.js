@@ -7,6 +7,7 @@ var request = require('request')
   , app     = express()
   , api_env = app.get('env')
   , jsdom   = require('jsdom')
+  , cheerio = require('cheerio')
   , orm     = require('orm')
   , configs = require('../config')(api_env);
 
@@ -45,24 +46,14 @@ exports.getLatestGame = function (record) {
   request({uri: games}, function (err, response, body) {
     // Basic error check
     if ( err && response.statusCode != 200 ) {console.log('Request error.')}
-    // Send the body parameter as the HTML code we will parse in jsdom
-    // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
-    jsdom.env({
-      html: body,
-      scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
-    },
-    function (err, window) {
-    
-      var $ = window.$ || window.jQuery,
-      $body = $('body #widgets > table > tbody > tr:first-child');
-      gameId = $body.find('.match-details-button').attr('rel');
+      var $ = cheerio.load(body);
+      var body = $('#widgets > table > tbody > tr:first-child');
+      var gameId = body.find('.match-details-button').attr('rel');
 
       self.game.game_id = gameId + '';
 
-      getPlayersOfLastGame();
-      return window.close();
+      return getPlayersOfLastGame();
 
-    });
   });
 
   function getPlayersOfLastGame() {
@@ -74,25 +65,16 @@ exports.getLatestGame = function (record) {
     request({uri: game}, function (err, response, body) {
       // Basic error check
       if ( err && response.statusCode != 200 ) {console.log('Request error.')}
-      // Send the body parameter as the HTML code we will parse in jsdom
-      // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
-      jsdom.env({
-        html: body,
-        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
-      },
-      function (err, window) {
-        // Use jQuery just as in regular HTML
-        var $ = window.$ || window.jQuery,
-        $body = $('body'),
-        players = $body.find('.yui-u.first tr > th > div > a');
+        
+        $ = cheerio.load(body);
+        var body = $('body'),
+        players = body.find('.yui-u.first tr > th > div > a');
 
         players.each(function() {
           game_players.push($(this).text());
         });
 
-        getPlayerStatsOfLastGame();
-        return window.close();
-      });
+        return getPlayerStatsOfLastGame();
     });
   }
 
@@ -104,42 +86,30 @@ exports.getLatestGame = function (record) {
     request({uri: stats}, function (err, response, body) {
       // Basic error check
       if ( err && response.statusCode != 200 ) {console.log('Request error.')}
-      // Send the body parameter as the HTML code we will parse in jsdom
-      // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
-      jsdom.env({
-        html: body,
-        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
-      },
-      function (err, window) {
-        // Use jQuery just as in regular HTML
-        var $ = window.$ || window.jQuery,
-        $body = $('body'),
-        $player = $body.find('tbody tr'),
-        $category = $player.find('td');
+        var $ = cheerio.load(body),
+        player = $('tbody tr');
 
-        $player.each(function (i, row) {
-          var $row = $(row);
+        player.each(function (i, row) {
+          var row = $(row);
           var playername = $(row).find('td:nth-child(2) a').text();
          
           game_players.map(function (callback, key) {
             if (game_players[key] == playername) {
               self.team[playername] = {};
+              category = row.find('td');
 
-              $category.each(function (i, stat) {
-                var statname = $row.find(stat).attr('title');
-                var $stat = $row.find(stat);
-                if ( $stat.index() > 2 ) {
+              category.each(function (i, stat) {
+                var statname = $(stat).attr('title');
+                if ( $(stat).index() > 2 ) {
                   statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
-                  self.team[playername][statname] = $stat.text();
+                  self.team[playername][statname] = $(stat).text();
                 }
               });
             }
           });
         });
 
-        getGameInfoOfLastGame();
-        return window.close();
-      });
+        return getGameInfoOfLastGame();
     });
   }
 
@@ -150,22 +120,13 @@ exports.getLatestGame = function (record) {
     request({uri: games}, function (err, response, body) {
       // Basic error check
       if ( err && response.statusCode != 200 ) {console.log('Request error.')}
-      // Send the body parameter as the HTML code we will parse in jsdom
-      // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
-      jsdom.env({
-        html: body,
-        scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
-      },
-      function (err, window) {
-      
-        var $ = window.$ || window.jQuery,
-        $body = $('tbody tr:first-child tbody .black:first-child'),
-        $opp = $body.find('.align-right.team'),
-        game_score = $body.find('.match-result-score').text().split('-'),
-        date = $body.find('.align-center.strong div:last-child').text().split(' ');
-
+        var $ = cheerio.load(body),
+        body = $('tbody tr:first-child tbody .black:first-child'),
+        opp = body.find('.align-right.team'),
+        game_score = body.find('.match-result-score').text().split('-'),
+        date = body.find('.align-center.strong div:last-child').text().split(' ');
         var time = parseInt(date[1], 10);
-        var hours = (date[2] === 'PM') ? time[0] : time[0] + 12;
+        var hours = (date[2] == 'PM') ? time : time + 12;
 
         self.date = new Date();
         self.date.setHours(hours);
@@ -173,11 +134,11 @@ exports.getLatestGame = function (record) {
         self.date.setSeconds('00');
 
         var reg = /^[a-z0-9]+$/gmi;
-        self.game.team2_name = $opp.find('a').text();
-        self.game.team2_id = parseInt($opp.find('a').attr('href').split('/')[4], 10);
+        self.game.team2_name = opp.find('a').text();
+        self.game.team2_id = parseInt(opp.find('a').attr('href').split('/')[4], 10);
 
-        $opp.find('a').remove();
-        self.game.team2_abbr = $opp.find('div').text().replace(/\W/g, '');
+        opp.find('a').remove();
+        self.game.team2_abbr = opp.find('div').text().replace(/\W/g, '');
         self.game.team2_score = parseInt(game_score[1]);
 
         self.game.team1_name = 'Puck Goes First';
@@ -185,12 +146,9 @@ exports.getLatestGame = function (record) {
         self.game.team1_score = parseInt(game_score[0]);
         self.game.team1_abbr = 'PGF';
 
-        self.game.date = self.date + '';
+        self.game.date = self.date.toLocaleString();
 
-        logResults();
-
-        return window.close();
-      });
+        return logResults();
     }); 
   }
 
@@ -212,7 +170,8 @@ exports.getLatestGame = function (record) {
 
         for (var player in self.team) {
           oldstat.find({name: player}, function (err, person) {
-            
+            console.log('person');
+            console.log(person);
             var newPlayerStat = {
               name: person[0].name
             };
@@ -225,7 +184,7 @@ exports.getLatestGame = function (record) {
 
             newPlayerStat.savepercentage = (newPlayerStat.savepercentage === 0) ? 0 : (((newPlayerStat.totalgoalsagainst + newPlayerStat.saves) / newPlayerStat.shots)).toFixed(3);
 
-            newPlayerStat['date_played'] = self.date + '';
+            newPlayerStat['date_played'] = self.date.toLocaleString();
 
             newstat.create([newPlayerStat], 
               function (err, item) {
@@ -252,31 +211,21 @@ exports.fillStats = function (record) {
   request({uri: stats}, function (err, response, body) {
     // Basic error check
     if ( err && response.statusCode != 200 ) {console.log('Request error.')}
-    // Send the body parameter as the HTML code we will parse in jsdom
-    // Also, tell jsdom to attach jQuery in the scripts and loaded from jQuery.com
-    jsdom.env({
-      html: body,
-      scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
-    },
-    function (err, window) {
-      // Use jQuery just as in regular HTML
-      var $ = window.$ || window.jQuery,
-      $body = $('body'),
-      $player = $body.find('tbody tr'),
-      $category = $player.find('td');
+      var $ = cheerio.load(body),
+      player = $('tbody tr'),
+      category = player.find('td');
 
-      $player.each(function (i, row) {
-        var $row = $(row);
-        var playername = $(row).find('td:nth-child(2) a').text();
+      player.each(function (i, row) {
+        var row = $(row);
+        var playername = row.find('td:nth-child(2) a').text();
 
         team.oldstats[playername] = {};
 
-        $category.each(function (i, stat) {
-          var statname = $row.find(stat).attr('title');
-          var $stat = $row.find(stat);
-          if ( $stat.index() > 2 ) {
+        category.each(function (i, stat) {
+          var statname = $(stat).attr('title');
+          if ( $(stat).index() > 2 ) {
             statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
-            team.oldstats[playername][statname] = $stat.text();
+            team.oldstats[playername][statname] = $(stat).text();
           }
         });
       });
@@ -312,11 +261,9 @@ exports.fillStats = function (record) {
           }).save(function (err) {
             if (err) console.log(err);
             console.log('Updated record');
-            window.close();
             db.close();
           });
         });
       });
-    });
   });
 }

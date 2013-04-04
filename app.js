@@ -9,6 +9,7 @@ var express  = require('express')
   , cronJob  = require('cron').CronJob
   , orm      = require('orm')
   , pg       = require('pg')
+  , cheerio  = require('cheerio')
   , app      = express()
   , api_env  = app.get('env')
   , configs  = require('./config')(api_env)
@@ -41,8 +42,8 @@ app.use(orm.express(configs.postgres.url, {
             Record.create([{
               team_id: 224,
               name: 'Puck Goes First',
-              wins: 6,
-              losses: 5,
+              wins: 8,
+              losses: 6,
               otl: 0
             }], function (err, team) {
               currentRecord.push(team[0].wins);
@@ -85,7 +86,7 @@ app.configure('development', function(){
 });
 
 var bloop = new Date();
-bloop.setSeconds(bloop.getSeconds() - 10);
+bloop.setSeconds(bloop.getSeconds() + 5);
 
 // new cronJob(configs.timer, function(){
 new cronJob(bloop, function(){
@@ -101,16 +102,8 @@ new cronJob(bloop, function(){
   request({uri: teamRecord}, function (err, response, body) {
     if ( err && response.statusCode != 200 ) {console.log('Request error.');}
 
-    // Send the body parameter as the HTML code we will parse in jsdom
-    // Also, tell jsdom to attach jQuery in the scripts
-    jsdom.env({
-      html: body,
-      scripts: ['http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js']
-      // scripts: [jquery]
-    },
-    function (err, window) {
-      var $ = window.$ || window.jQuery;
-      var $body = $('body .current-season-club-stats-main-container'),
+      var $ = cheerio.load(body);
+      var $body = $('.current-season-club-stats-main-container'),
       record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
       var newGame = false;
 
@@ -127,11 +120,8 @@ new cronJob(bloop, function(){
         console.log('The team has not played a new game');
       }
 
-      currentRecord = record;
+      return currentRecord = record;
 
-      return window.close();
-
-    });
   });
 }, null, true);
 
