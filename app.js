@@ -84,10 +84,11 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-// var bloop = new Date();
-// bloop.setSeconds(bloop.getSeconds() + 10);
+var bloop = new Date();
+bloop.setSeconds(bloop.getSeconds() - 10);
 
-new cronJob(configs.timer, function(){
+// new cronJob(configs.timer, function(){
+new cronJob(bloop, function(){
 
   request({uri: 'http://eashl.herokuapp.com'}, function () {});
 
@@ -111,13 +112,19 @@ new cronJob(configs.timer, function(){
       var $ = window.$ || window.jQuery;
       var $body = $('body .current-season-club-stats-main-container'),
       record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
+      var newGame = false;
 
       // For each part of record (wins-losses-ties), check against teams current record and get the game stats from the most recently played game if it's different
       for (var i = 0, rLen = record.length; i < rLen; i += 1) {
         if ( record[i] != currentRecord[i] && currentRecord.length > 2 ) {
           console.log('Team\'s new record is: ' + record.join('-'));
+          newGame = true;
           routes.getLatestGame(record);
         }
+      }
+
+      if (!newGame) {
+        console.log('The team has not played a new game');
       }
 
       currentRecord = record;
@@ -129,6 +136,8 @@ new cronJob(configs.timer, function(){
 }, null, true);
 
 app.get('/', routes.index);
+
+app.get('/:id', routes.player);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));

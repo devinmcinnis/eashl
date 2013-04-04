@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1= title
+  h2 #{playername}
+  if (stats.length > 0)
+    .player-stats
+      table
+        thead
+          tr
+          each i, statname in stats[0]
+            th(class="#{statname}")= statname
+        tbody
+          each stat in stats
+            tr
+            each value, statname in stat
+              td(class="#{statname}")= value
+  else
+    p No stats in database

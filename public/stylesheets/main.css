@@ -1,2 +1,5 @@
 body{padding:50px;font:14px "Lucida Grande",Helvetica,Arial,sans-serif}
 a{color:#00b7ff}
+h2{text-transform:capitalize}
+.id,.name,.game_id,td:nth-child(n+15),th:nth-child(n+15){display:none}
+td{text-align:center}

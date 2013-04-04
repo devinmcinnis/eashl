@@ -9,9 +9,27 @@ var request = require('request')
   , jsdom   = require('jsdom')
   , orm     = require('orm')
   , configs = require('../config')(api_env);
+
+exports.player = function (req, res) {
+  var player = [];
+
+  orm.connect(configs.postgres.url, function (err, db) {
+    db.load('./models/models', function (err) {
+      var stats = db.models.stats;
+      stats.find({name: req.params.id}, function (err, stat) {
+        res.render('player', {
+          title: 'PGF Stat Logger',
+          stats: stat,
+          playername: req.params.id
+        });
+      });
+    });
+  });
+  
+};
   
 exports.index = function(req, res){
-  res.render('index', { title: 'EASHL PGF Stat Logger' });
+  res.render('index', { title: 'PGF Stat Logger' });
 };
 
 exports.getLatestGame = function (record) {
