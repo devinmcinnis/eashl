@@ -169,6 +169,7 @@ exports.getLatestGame = function (record) {
         });
         for (var playername in self.team) {
           oldstat.find({name: playername}, function (err, person) {
+            
             var newPlayerStat = {
               name: person[0].name
             };

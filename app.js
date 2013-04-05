@@ -29,12 +29,12 @@ app.use(orm.express(configs.postgres.url, {
         var Record    = db.models.records;
 
         // If "oldstats" table has nothing inside of it, get the current total stats for every player
-        // Oldstats.find({}, function (err, count) {
-        //   cb(err, item);
-        //   if (count.length < 1) {
-        //     routes.fillStats();
-        //   }
-        // });
+        Oldstats.find({}, function (err, count) {
+          cb(err, item);
+          if (count.length < 1) {
+            routes.fillStats();
+          }
+        });
 
         Record.find({team_id: 224}, function (err, exists) {
           if (exists.length < 1) {
@@ -128,6 +128,8 @@ new cronJob(bloop, function(){
 app.get('/', routes.index);
 
 app.get('/:id', routes.player);
+
+app.get('/filloldstatsbecauseifuckedsomethingup', routes.fillStats);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
