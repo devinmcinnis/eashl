@@ -183,7 +183,6 @@ exports.getLatestGame = function (record) {
 
             newPlayerStat.savepercentage = (newPlayerStat.savepercentage === 0) ? 0 : (((newPlayerStat.totalgoalsagainst + newPlayerStat.saves) / newPlayerStat.shots)).toFixed(3);
 
-console.log(self.date)
             newPlayerStat['date_played'] = self.date.toISOString();
 
             newstat.create([newPlayerStat], 
@@ -195,9 +194,8 @@ console.log(self.date)
 
           });
         }
-
-        exports.fillStats(record);
         console.log('Stat collection complete.');
+        exports.fillStats(record);
       });
     });
   }
@@ -205,7 +203,7 @@ console.log(self.date)
 
 exports.fillStats = function (record) {
 
-  var team = this;
+  var team = {};
       team.oldstats = {};
 
   request({uri: stats}, function (err, response, body) {
@@ -254,10 +252,10 @@ exports.fillStats = function (record) {
 
           // Update records tables in database
           var Record = db.models.records;
-          Record.find({team_id: 224}).each(function (team) {
-            team.wins = record[0];
-            team.losses = record[1];
-            team.ties = record [2];
+          Record.find({team_id: 224}).each(function (teamrecord) {
+            teamrecord.wins = record[0];
+            teamrecord.losses = record[1];
+            teamrecord.otl = record [2];
           }).save(function (err) {
             if (err) console.log(err);
             console.log('Updated record');
