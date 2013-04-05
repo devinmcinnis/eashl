@@ -96,7 +96,7 @@ exports.getLatestGame = function (record) {
           game_players.map(function (callback, key) {
             if (game_players[key] == playername) {
               self.team[playername] = {};
-              category = row.find('td');
+              var category = row.find('td');
 
               category.each(function (i, stat) {
                 var statname = $(stat).attr('title');
@@ -212,12 +212,12 @@ exports.fillStats = function (record) {
     // Basic error check
     if ( err && response.statusCode != 200 ) {console.log('Request error.')}
       var $ = cheerio.load(body),
-      player = $('tbody tr'),
-      category = player.find('td');
+      player = $('tbody tr');
 
       player.each(function (i, row) {
         var row = $(row);
         var playername = row.find('td:nth-child(2) a').text();
+        var category = row.find('td');
 
         team.oldstats[playername] = {};
 
