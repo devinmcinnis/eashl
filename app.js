@@ -42,7 +42,7 @@ app.use(orm.express(configs.postgres.url, {
             Record.create([{
               team_id: 224,
               name: 'Puck Goes First',
-              wins: 9,
+              wins: 11,
               losses: 7,
               otl: 0
             }], function (err, team) {
@@ -85,11 +85,11 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var bloop = new Date();
-bloop.setSeconds(bloop.getSeconds() + 5);
+// var bloop = new Date();
+// bloop.setSeconds(bloop.getSeconds() + 5);
 
-// new cronJob(configs.timer, function(){
-new cronJob(bloop, function(){
+new cronJob(configs.timer, function(){
+// new cronJob(bloop, function(){
 
   request({uri: 'http://eashl.herokuapp.com'}, function () {});
 

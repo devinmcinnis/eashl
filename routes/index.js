@@ -125,8 +125,9 @@ exports.getLatestGame = function (record) {
         opp = body.find('.align-right.team'),
         game_score = body.find('.match-result-score').text().split('-'),
         date = body.find('.align-center.strong div:last-child').text().split(' ');
-        var time = parseInt(date[1], 10);
-        var hours = (date[2] == 'PM') ? time : time + 12;
+        var time = date[1].split(':');
+        var hours = (date[2] == 'PM') ? parseInt(time[0],10) : parseInt(time[0],10) + 12;
+        var minutes = parseInt(time[1],10);
 
         self.date = new Date();
         self.date.setHours(hours);
@@ -146,7 +147,7 @@ exports.getLatestGame = function (record) {
         self.game.team1_score = parseInt(game_score[0]);
         self.game.team1_abbr = 'PGF';
 
-        self.game.date = self.date.toLocaleString();
+        self.game.date = self.date.toISOString();
 
         return logResults();
     }); 
@@ -169,7 +170,7 @@ exports.getLatestGame = function (record) {
         });
         for (var playername in self.team) {
           oldstat.find({name: playername}, function (err, person) {
-            
+
             var newPlayerStat = {
               name: person[0].name
             };
@@ -182,7 +183,8 @@ exports.getLatestGame = function (record) {
 
             newPlayerStat.savepercentage = (newPlayerStat.savepercentage === 0) ? 0 : (((newPlayerStat.totalgoalsagainst + newPlayerStat.saves) / newPlayerStat.shots)).toFixed(3);
 
-            newPlayerStat['date_played'] = self.date.toLocaleString();
+console.log(self.date)
+            newPlayerStat['date_played'] = self.date.toISOString();
 
             newstat.create([newPlayerStat], 
               function (err, item) {
