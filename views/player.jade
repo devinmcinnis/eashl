@@ -1,19 +1,36 @@
 extends layout
 
 block content
-  h1= title
   h2 #{playername}
   if (stats.length > 0)
     .player-stats
       table
         thead
           tr
-          each i, statname in stats[0]
-            th(class="#{statname}")= statname
+            th Date
+            th G
+            th A
+            th P
+            th +/-
+            th PIMS
+            th PPG
+            th SHG
+            th Hits
+            th BS
+            th S
+          //- each i, statname in stats[0]
+          //-   th(class="#{statname}")= statname
         tbody
           each stat in stats
             tr
-            each value, statname in stat
-              td(class="#{statname}")= value
+              each value, statname in stat
+                if (statname === 'date_played')
+                  - var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
+                  - var date = value;
+                  - var month = months[date.getMonth()];
+                  - var day = date.getDate();
+                  td= month + "-" + day
+                else
+                  td(class="#{statname}")= value
   else
     p No stats in database

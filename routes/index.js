@@ -18,8 +18,9 @@ exports.player = function (req, res) {
     db.load('./models/models', function (err) {
       var stats = db.models.stats;
       stats.find({name: req.params.id}, function (err, stat) {
+        console.log(stat);
         res.render('player', {
-          title: 'PGF Stat Logger',
+          title: 'The Unpredictable, Unncessary, and Unreliable PGF Stat Logger',
           stats: stat,
           playername: req.params.id
         });
@@ -30,7 +31,7 @@ exports.player = function (req, res) {
 };
   
 exports.index = function(req, res){
-  res.render('index', { title: 'PGF Stat Logger' });
+  res.render('index', { title: 'The Unpredictable, Unncessary, and Unreliable PGF Stat Logger' });
 };
 
 exports.getLatestGame = function (record) {

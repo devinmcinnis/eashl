@@ -3,5 +3,9 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/main.css')
+    link(rel="favicon", href="/images/logo.png")
   body
+    h1
+      a(href="/")= title
+    img.team-logo(src="/images/logo.png")
     block content

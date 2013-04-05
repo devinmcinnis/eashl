@@ -1,11 +1,17 @@
 body
   padding: 50px
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
-a
-  color: #00B7FF
 
-h2
-  text-transform: capitalize
+a
+  color: #222
+  text-decoration: none
+  cursor: pointer
+
+  &:hover
+    color: #00B7FF
+
+h1 a
+  color: black
 
 .id,
 .name,
@@ -14,5 +20,29 @@ td:nth-child(n+15),
 th:nth-child(n+15)
   display: none
 
+table
+  border-collapse: collapse
+  margin: 0 auto
+
+thead tr
+  background-color: #EEE
+
+tbody tr:nth-child(even)
+  background-color: lighten(#EEE, 50%)
+
+th
+  width: 50px
+  padding: 8px
+
 td
   text-align: center
+  padding: 8px
+
+.team-logo
+  position: fixed
+  bottom: 0px
+  left: 5px
+  width: 30px
+
+.broken-p
+  color: #00B7FF
