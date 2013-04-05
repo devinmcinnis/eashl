@@ -91,7 +91,7 @@ exports.getLatestGame = function (record) {
 
         player.each(function (i, row) {
           var row = $(row);
-          var playername = $(row).find('td:nth-child(2) a').text();
+          var playername = row.find('td:nth-child(2) a').text();
          
           game_players.map(function (callback, key) {
             if (game_players[key] == playername) {
@@ -100,7 +100,7 @@ exports.getLatestGame = function (record) {
 
               category.each(function (i, stat) {
                 var statname = $(stat).attr('title');
-                if ( $(stat).index() > 2 ) {
+                if ( i > 2 ) {
                   statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
                   self.team[playername][statname] = $(stat).text();
                 }
@@ -162,22 +162,19 @@ exports.getLatestGame = function (record) {
 
         var oldstat = db.models.oldstats;
         var newstat = db.models.stats;
-        var Game = db.models.games;
+        var Game    = db.models.games;
 
         Game.create([self.game], function (err, item) {
           if (err) console.log(err);
         });
-
-        for (var player in self.team) {
-          oldstat.find({name: player}, function (err, person) {
-            console.log('person');
-            console.log(person);
+        for (var playername in self.team) {
+          oldstat.find({name: playername}, function (err, person) {
             var newPlayerStat = {
               name: person[0].name
             };
 
-            for (var stat in self.team[player]) {
-              newPlayerStat[stat] = self.team[person[0].name][stat] - person[0][stat];
+            for (var statcat in self.team[playername]) {
+              newPlayerStat[statcat] = self.team[person[0].name][statcat] - person[0][statcat];
             }
 
             newPlayerStat.shootingpercentage = (newPlayerStat.goals === 0) ? 0 : ((newPlayerStat.goals / newPlayerStat.shots) * 100).toFixed(2);
@@ -223,7 +220,7 @@ exports.fillStats = function (record) {
 
         category.each(function (i, stat) {
           var statname = $(stat).attr('title');
-          if ( $(stat).index() > 2 ) {
+          if ( i > 2 ) {
             statname = statname.toLowerCase().replace(/[^0-9a-z-]/g,"");
             team.oldstats[playername][statname] = $(stat).text();
           }
