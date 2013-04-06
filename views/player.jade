@@ -3,7 +3,7 @@ extends layout
 block content
   h2 #{playername}
   p
-    em Time's are in PST for now
+    em Time's are in GMT or something
   if (stats.length > 0)
     .player-stats
       table
@@ -27,44 +27,17 @@ block content
             tr
               each value, statname in stat
                 if (statname === 'date_played')
-                  script
-                    function formatDate(date) {
-                      var d = new Date(date);
-                      var hh = d.getHours();
-                      var m = d.getMinutes();
-                      var s = d.getSeconds();
-                      var dd = "AM";
-                      var h = hh;
-                      if (h >= 12) {
-                          h = hh-12;
-                          dd = "PM";
-                      }
-                      if (h == 0) {
-                          h = 12;
-                      }
-                      m = m<10?"0"+m:m;
-                      
-                      s = s<10?"0"+s:s;
-
-                      h = h<10?"0"+h:h;
-
-                      var pattern = new RegExp("0?"+hh+":"+m+":"+s);
-                      return date.replace(pattern,h+":"+m+" "+dd)
-                    }
-
-                    alert(formatDate(value));
-
                   - var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
                   - var date = value;
                   - var month = months[date.getMonth()];
                   - var day = date.getDate();
-                  - var dd = ' AM';
+                  - var dd = 'AM';
                   - var hours = date.getHours();
-                  - if (hours >= 12) { hours = hours - 12; dd = ' PM'; }
+                  - if (hours >= 12) { hours = hours - 12; dd = 'PM'; }
                   - if (hours === 0) { hours = 12 }
                   - var minutes = date.getMinutes();
                   - minutes = minutes < 10 ? "0" + minutes : minutes;
-                  td= month + "-" + day + hours + ':' + minutes + dd
+                  td= month + "-" + day + ' ' + hours + ':' + minutes + dd
                 else
                   td(class="#{statname}")= value
   else
