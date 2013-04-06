@@ -6,7 +6,6 @@ var request = require('request')
     express = require('express')
   , app     = express()
   , api_env = app.get('env')
-  , jsdom   = require('jsdom')
   , cheerio = require('cheerio')
   , orm     = require('orm')
   , configs = require('../config')(api_env);

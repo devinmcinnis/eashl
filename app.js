@@ -3,7 +3,6 @@ var express  = require('express')
   , http     = require('http')
   , path     = require('path')
   , request  = require('request')
-  , jsdom    = require('jsdom')
   , routes   = require('./routes')
   , fs       = require('fs')
   , cronJob  = require('cron').CronJob
