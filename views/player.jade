@@ -3,7 +3,7 @@ extends layout
 block content
   h2 #{playername}
   p
-    em Time's are in GMT or something
+    em Time's are in Best Coast Standard Time
   if (stats.length > 0)
     .player-stats
       table
@@ -37,7 +37,7 @@ block content
                   - if (hours === 0) { hours = 12 }
                   - var minutes = date.getMinutes();
                   - minutes = minutes < 10 ? "0" + minutes : minutes;
-                  td= month + "-" + day + ' ' + hours + ':' + minutes + dd
+                  td= month + "-" + day + ' ' + hours + ':' + minutes + 'PM'
                 else
                   td(class="#{statname}")= value
   else
