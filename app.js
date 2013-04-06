@@ -42,8 +42,8 @@ app.use(orm.express(configs.postgres.url, {
             Record.create([{
               team_id: 224,
               name: 'Puck Goes First',
-              wins: 11,
-              losses: 7,
+              wins: 18,
+              losses: 8,
               otl: 0
             }], function (err, team) {
               currentRecord.push(team[0].wins);
