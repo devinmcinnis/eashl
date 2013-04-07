@@ -111,7 +111,8 @@ new cronJob(configs.timer, function(){
         if ( record[i] != currentRecord[i] && currentRecord.length > 2 ) {
           console.log('Team\'s new record is: ' + record.join('-'));
           newGame = true;
-          routes.getLatestGame(record);
+          currentRecord = record;
+          return routes.getLatestGame(record);
         }
       }
 
