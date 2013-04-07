@@ -84,11 +84,11 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-var bloop = new Date();
-bloop.setSeconds(bloop.getSeconds() + 5);
+// var bloop = new Date();
+// bloop.setSeconds(bloop.getSeconds() + 5);
 
-// new cronJob(configs.timer, function(){
-new cronJob(bloop, function(){
+new cronJob(configs.timer, function(){
+// new cronJob(bloop, function(){
 
   request({uri: 'http://eashl.herokuapp.com'}, function () {});
 
