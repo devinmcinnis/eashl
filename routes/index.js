@@ -44,7 +44,7 @@ exports.index = function(req, res){
   });
 };
 
-exports.getLatestGame = function (record) {
+exports.getLatestGame = function () {
 
   var self = this,
       game_players = [];
@@ -54,7 +54,7 @@ exports.getLatestGame = function (record) {
   console.log('Getting the latest game information..');
   // console.log('This may take a minute or so.');
   
-  request({uri: games}, function (err, response, body) {
+  return request({uri: games}, function (err, response, body) {
 
     if ( err && response.statusCode != 200 ) {console.log('Request error.')}
 
@@ -74,7 +74,7 @@ exports.getLatestGame = function (record) {
     // console.log('Getting a list of the players that played in the last game...');
 
     // Tell the request that we want to fetch eashl.com, send the restuls to a function
-    request({uri: game}, function (err, response, body) {
+    return request({uri: game}, function (err, response, body) {
       // Basic error check
       if ( err && response.statusCode != 200 ) {console.log('Request error.')}
         
@@ -95,7 +95,7 @@ exports.getLatestGame = function (record) {
     // console.log('Getting the stats of the players in the last game...');
 
     // Tell the request that we want to fetch eashl.com, send the restuls to a function
-    request({uri: stats}, function (err, response, body) {
+    return request({uri: stats}, function (err, response, body) {
       // Basic error check
       if ( err && response.statusCode != 200 ) {console.log('Request error.')}
         var $ = cheerio.load(body),
@@ -200,22 +200,24 @@ exports.getLatestGame = function (record) {
           });
         }
         console.log('Stat collection complete.');
-        return exports.fillStats(record);
+        return exports.fillStats(self['date']);
       });
     });
   }
 };
 
-exports.fillStats = function (record) {
+exports.fillStats = function (date) {
 
-  var team = {};
-      team.oldstats = {};
+  var team = {
+    oldstats: {}
+  };
 
-  return request({uri: stats}, function (err, response, body) {
-    // Basic error check
+  return request({uri: stats}, function (err, response, statsBody) {
+
     if ( err && response.statusCode != 200 ) {console.log('Request error.')}
-      
-    var $ = cheerio.load(body),
+    
+    var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview',
+    $ = cheerio.load(statsBody),
     player = $('tbody tr');
 
     player.each(function (i, row) {
@@ -234,45 +236,56 @@ exports.fillStats = function (record) {
       });
     });
 
-    return orm.connect(configs.postgres.url, function(err, db) {
-      db.load('./models/models', function (err) {
-        if (err) console.log(err);
-        
-        var oldstat = db.models.oldstats;
-            oldstat.find({}).remove(function (err) {
-              if (err) console.log(err);
-            });
-        var playerObj = {};
+    return request({uri: teamRecord}, function (err, response, recordBody) {
+      if ( err && response.statusCode != 200 ) {console.log('Request error.');}
+      
+      var $ = cheerio.load(recordBody);
+      var $body = $('.current-season-club-stats-main-container'),
+      record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
 
-        for (var player in team.oldstats) {
-          playerObj.name = player;
-          for (var stat in team.oldstats[player]) {
-            statname = stat.toLowerCase().replace(/[^0-9a-z-]/g,"");
-            playerObj[statname] = parseFloat(team.oldstats[player][stat], 10);
-          }
-          oldstat.create([playerObj], function (err, item) {
-            if (err) console.log(err)
-          });
-          playerObj = {};
-        }
-
-        // Update records tables in database
-        var Record = db.models.records;
-        return Record.find({team_id: 224}).each(function (teamrecord) {
-          teamrecord.wins = record[0];
-          teamrecord.losses = record[1];
-          teamrecord.otl = record [2];
-        }).save(function (err) {
+      return orm.connect(configs.postgres.url, function(err, db) {
+        return db.load('./models/models', function (err) {
           if (err) console.log(err);
-          console.log('Updated record');
-          return db.close();
+          
+          var oldstat = db.models.oldstats;
+              oldstat.find({}).remove(function (err) {
+                if (err) console.log(err);
+              });
+          var playerObj = {};
+
+          for (var player in team.oldstats) {
+            playerObj.name = player;
+            for (var stat in team.oldstats[player]) {
+              statname = stat.toLowerCase().replace(/[^0-9a-z-]/g,"");
+              playerObj[statname] = parseFloat(team.oldstats[player][stat], 10);
+            }
+            oldstat.create([playerObj], function (err, item) {
+              if (err) console.log(err)
+            });
+            playerObj = {};
+          }
+
+          // Update records tables in database
+          var Record = db.models.records;
+
+          return Record.create([{
+            team_id: 224,
+            name: 'Puck Goes First',
+            wins: record[0],
+            losses: record[1],
+            otl: record[2],
+            last_game: date
+          }], function (err, team) {
+            if (err) { return console.log(err); }
+            return console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);
+          });
         });
       });
     });
   });
 }
 
-exports.whoIsOnline = function (req, res) {
+exports.whosOnline = function (req, res) {
     
   var onlineInfo = {};
 
@@ -297,7 +310,7 @@ exports.whoIsOnline = function (req, res) {
     // Team Members
     return request('http://www.easportsworld.com/p/easw/a/easwclub/s/gs/blaze/401A0001/clubs/getMembers?clid=224&ofrc=0&mxrc=100', function (err, response, sBody) {
 
-      return parseString(sBody, {trim: true}, function (err, xml) {
+      parseString(sBody, {trim: true}, function (err, xml) {
         var teamlist = xml.getmembers.clubmemberlist[0].clubmember;
         for (var i in teamlist) {
           for (var x in onlineInfo) {
