@@ -43,7 +43,7 @@ app.use(orm.express(configs.postgres.url, {
               wins: 0,
               losses: 0,
               otl: 0,
-              last_game: (new Date).toGMTString()
+              date: (new Date).toGMTString()
             }], function (err, team) {
               db.close();
             });
@@ -100,9 +100,9 @@ new cronJob(configs.timer, function(){
 
           var Record = db.models.records;
 
-          return Record.find({team_id: 224}, ['last_game', 'Z'], 1, function (err, lastGame) {
-            console.log(lastGame[0].last_game.toString(), time.toString())
-            if (lastGame.length > 0 && lastGame[0].last_game.toString() === time.toString()) {
+          return Record.find({team_id: 224}, ['date', 'Z'], 1, function (err, lastGame) {
+            console.log(lastGame[0].date.toString(), time.toString())
+            if (lastGame.length > 0 && lastGame[0].date.toString() === time.toString()) {
               console.log(lastGame[0]);
               return console.log('Team has not played a game since ' + time);
             } else {

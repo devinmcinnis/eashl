@@ -274,7 +274,7 @@ exports.fillStats = function (date) {
             wins: record[0],
             losses: record[1],
             otl: record[2],
-            last_game: date
+            date: date
           }], function (err, team) {
             if (err) { return console.log(err); }
             return console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);

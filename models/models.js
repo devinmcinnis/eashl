@@ -10,7 +10,8 @@ module.exports = function (db, cb) {
     name        : String,
     wins        : Number,
     losses      : Number,
-    otl         : Number
+    otl         : Number,
+    date        : Date
   }).sync();
 
   db.define("players", {
