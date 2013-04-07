@@ -85,7 +85,7 @@ app.configure('development', function(){
 });
 
 // var bloop = new Date();
-// bloop.setSeconds(bloop.getSeconds() + 5);
+// bloop.setSeconds(bloop.getSeconds() + 2);
 
 new cronJob(configs.timer, function(){
 // new cronJob(bloop, function(){
@@ -126,9 +126,11 @@ new cronJob(configs.timer, function(){
 
 app.get('/', routes.index);
 
-app.get('/:id', routes.player);
+app.get('/player/:id', routes.player);
 
 app.get('/filloldstatsbecauseifuckedsomethingup', routes.fillStats);
+
+app.get('/whoisonline', routes.whoIsOnline);
 
 app.use(function(req, res, next){
   res.status(404);
