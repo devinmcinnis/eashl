@@ -18,7 +18,9 @@
     "request"   : "2.14.0",
     "pg"        : "0.15.1",
     "orm"       : "2.0.6",
-    "cheerio"   : "0.10.8"  
+    "cheerio"   : "0.10.8",
+    "elementtree": "0.1.5",
+    "inflector" : "0.0.1"
   },
   "devDependencies": {
     "nodemon" : "~0.7.1"

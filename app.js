@@ -43,7 +43,7 @@ app.use(orm.express(configs.postgres.url, {
               wins: 0,
               losses: 0,
               otl: 0,
-              date: (new Date).toGMTString()
+              date: (new Date(1970)).toGMTString()
             }], function (err, team) {
               db.close();
             });
