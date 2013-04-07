@@ -266,7 +266,7 @@ exports.fillStats = function (date) {
 exports.updateRecord = updateRecord = function (date) {
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
 
-  if (typeof date != 'string' ) { date = timeToHuman(date); }
+  if (typeof parseInt(date,10) === 'number' ) { date = timeToHuman(date); }
 
   return request({uri: teamRecord}, function (err, response, recordBody) {
     if ( err && response.statusCode != 200 ) {console.log('Request error.');}
