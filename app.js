@@ -26,6 +26,7 @@ app.use(orm.express(configs.postgres.url, {
 
         var Oldstats  = db.models.oldstats;
         var Record    = db.models.records;
+        Record.drop();
 
         // If "oldstats" table has nothing inside of it, get the current total stats for every player
         Oldstats.find({}, function (err, count) {
