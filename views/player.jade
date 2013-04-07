@@ -1,7 +1,6 @@
 extends layout
 
 block content
-  h2 #{playername}
   p
     em Time's are in Best Coast Standard Time
   if (stats.length > 0)
@@ -20,6 +19,7 @@ block content
             th Hits
             th BS
             th S
+            th S%
           //- each i, statname in stats[0]
           //-   th(class="#{statname}")= statname
         tbody
