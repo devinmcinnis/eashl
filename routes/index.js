@@ -17,7 +17,6 @@ exports.player = function (req, res) {
     db.load('./models/models', function (err) {
       var stats = db.models.stats;
       stats.find({name: req.params.id}, function (err, stat) {
-        console.log(stat);
         res.render('player', {
           title: 'The Unpredictable, Unnecessary, and Unreliable PGF Stat Logger',
           stats: stat,
