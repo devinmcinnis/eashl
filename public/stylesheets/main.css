@@ -1,11 +1,12 @@
 body{padding:50px;font:14px "Lucida Grande",Helvetica,Arial,sans-serif}
-a{color:#222;text-decoration:none;cursor:pointer;}
+a{color:#333;text-decoration:none;cursor:pointer;}
 a:hover{color:#00b7ff}
 h1 a{color:#000}
-.id,.name,.game_id,td:nth-child(n+15),th:nth-child(n+15){display:none}
+.id,.name,.game_id,td:nth-child(n+16){display:none}
 table{border-collapse:collapse;margin:0 auto}
-thead tr{background-color:#eee}
-tbody tr:nth-child(even){background-color:#f7f7f7}
+.online-members th,.online-members td{display:block;width:auto}
+.online-members th,thead tr{background-color:#eee}
+.online-members td:nth-child(odd),tbody tr:nth-child(even){background-color:#f7f7f7}
 th{width:50px;padding:8px}
 td{text-align:center;padding:8px}
 .team-logo{position:fixed;bottom:0;left:5px;width:30px}

@@ -3,7 +3,7 @@ body
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
 
 a
-  color: #222
+  color: #333
   text-decoration: none
   cursor: pointer
 
@@ -23,9 +23,16 @@ table
   border-collapse: collapse
   margin: 0 auto
 
+.online-members th,
+.online-members td
+  display: block
+  width: auto
+
+.online-members th
 thead tr
   background-color: #EEE
 
+.online-members td:nth-child(odd),
 tbody tr:nth-child(even)
   background-color: lighten(#EEE, 50%)
 

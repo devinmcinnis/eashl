@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  table.online-members
+    - var onlinecount = 4;
+    each status in membersOnline
+      - onlinecount -= 1;
+      if status.count > 0
+        - onlinecount += 1;
+        tr
+          th= status.title
+          each member in status.members
+            td= member
+      - if (onlinecount === 0)
+        p No one is online.
