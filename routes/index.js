@@ -216,8 +216,7 @@ exports.fillStats = function (date) {
 
     if ( err && response.statusCode != 200 ) {console.log('Request error.')}
     
-    var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview',
-    $ = cheerio.load(statsBody),
+    var $ = cheerio.load(statsBody),
     player = $('tbody tr');
 
     player.each(function (i, row) {
@@ -236,49 +235,63 @@ exports.fillStats = function (date) {
       });
     });
 
-    return request({uri: teamRecord}, function (err, response, recordBody) {
-      if ( err && response.statusCode != 200 ) {console.log('Request error.');}
-      
-      var $ = cheerio.load(recordBody);
-      var $body = $('.current-season-club-stats-main-container'),
-      record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
-
-      return orm.connect(configs.postgres.url, function(err, db) {
-        return db.load('./models/models', function (err) {
-          if (err) console.log(err);
-          
-          var oldstat = db.models.oldstats;
-              oldstat.find({}).remove(function (err) {
-                if (err) console.log(err);
-              });
-          var playerObj = {};
-
-          for (var player in team.oldstats) {
-            playerObj.name = player;
-            for (var stat in team.oldstats[player]) {
-              statname = stat.toLowerCase().replace(/[^0-9a-z-]/g,"");
-              playerObj[statname] = parseFloat(team.oldstats[player][stat], 10);
-            }
-            oldstat.create([playerObj], function (err, item) {
-              if (err) console.log(err)
+    return orm.connect(configs.postgres.url, function(err, db) {
+      return db.load('./models/models', function (err) {
+        if (err) console.log(err);
+        
+        var oldstat = db.models.oldstats;
+            oldstat.find({}).remove(function (err) {
+              if (err) console.log(err);
             });
-            playerObj = {};
+        var playerObj = {};
+
+        for (var player in team.oldstats) {
+          playerObj.name = player;
+          for (var stat in team.oldstats[player]) {
+            statname = stat.toLowerCase().replace(/[^0-9a-z-]/g,"");
+            playerObj[statname] = parseFloat(team.oldstats[player][stat], 10);
           }
-
-          // Update records tables in database
-          var Record = db.models.records;
-
-          return Record.create([{
-            team_id: 224,
-            name: 'Puck Goes First',
-            wins: record[0],
-            losses: record[1],
-            otl: record[2],
-            date: date
-          }], function (err, team) {
-            if (err) { return console.log(err); }
-            return console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);
+          oldstat.create([playerObj], function (err, item) {
+            if (err) console.log(err)
           });
+          playerObj = {};
+        }
+
+        return updateRecord(date);
+      });
+    });
+  });
+}
+
+exports.updateRecord = updateRecord = function (date) {
+  var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
+
+  if (typeof date != 'string' ) { date = timeToHuman(date); }
+
+  return request({uri: teamRecord}, function (err, response, recordBody) {
+    if ( err && response.statusCode != 200 ) {console.log('Request error.');}
+    
+    var $ = cheerio.load(recordBody);
+    var $body = $('.current-season-club-stats-main-container'),
+    record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
+
+    return orm.connect(configs.postgres.url, function(err, db) {
+      return db.load('./models/models', function (err) {
+        if (err) console.log(err);
+
+        // Update records tables in database
+        var Record = db.models.records;
+
+        return Record.create([{
+          team_id: 224,
+          name: 'Puck Goes First',
+          wins: record[0],
+          losses: record[1],
+          otl: record[2],
+          date: date
+        }], function (err, team) {
+          if (err) { return console.log(err); }
+          return console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);
         });
       });
     });
