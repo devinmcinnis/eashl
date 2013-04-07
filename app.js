@@ -33,24 +33,6 @@ app.use(orm.express(configs.postgres.url, {
             routes.fillStats();
           }
         });
-
-        Record.find({team_id: 224}, function (err, exists) {
-          if (exists.length < 1) {
-
-            return Record.create([{
-              team_id: 224,
-              name: 'Puck Goes First',
-              wins: 0,
-              losses: 0,
-              otl: 0,
-              date: (new Date(1970)).toGMTString()
-            }], function (err, team) {
-              db.close();
-            });
-
-          }
-        });
-
       });
     }
 }));
@@ -101,14 +83,15 @@ new cronJob(configs.timer, function(){
           var Record = db.models.records;
 
           return Record.find({team_id: 224}, ['date', 'Z'], 1, function (err, lastGame) {
-            console.log(lastGame[0].date.toString(), time.toString())
             if (lastGame.length > 0 && lastGame[0].date.toString() === time.toString()) {
-              console.log(lastGame[0]);
               return console.log('Team has not played a game since ' + time);
-            } else {
+            } else if (lastGame.length > 0) {
               console.log(lastGame[0].name + ' played a game at ' + time);
               console.log('Current record: '+lastGame[0].wins+'-'+lastGame[0].losses+'-'+lastGame[0].otl);
               return routes.getLatestGame();
+            } else {
+              console.log('No record found; creating new record.')
+              return routes.updateRecord(timeXML.findclubs.clublist[0].club[0].clubinfo[0].lastgametime[0]);
             }
           });
         });
