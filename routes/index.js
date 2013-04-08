@@ -51,7 +51,7 @@ exports.getLatestGame = function (newDate) {
       self.team = {};
       self.game = {};
 
-  console.log('Getting the latest game information..');
+  // console.log('Getting the latest game information..');
   // console.log('This may take a minute or so.');
   
   return request({uri: games}, function (err, response, body) {
@@ -159,7 +159,6 @@ exports.getLatestGame = function (newDate) {
 
   function logResults() {
     // console.log('Results of the last game played:')
-    // console.log(self);
 
     return orm.connect(configs.postgres.url, function(err, db) {
       return db.load('./models/models', function (err) {
@@ -175,7 +174,6 @@ exports.getLatestGame = function (newDate) {
 
         for (var playername in self.team) {
           oldstat.find({name: playername}, function (err, person) {
-
             var newPlayerStat = {
               name: person[0].name
             };
@@ -192,7 +190,7 @@ exports.getLatestGame = function (newDate) {
 
             newstat.create([newPlayerStat], 
               function (err, item) {
-              if (err) console.log(err);
+              if (err) { return console.log(err); }
             });
             
             newPlayerStat = {};
@@ -206,7 +204,7 @@ exports.getLatestGame = function (newDate) {
   }
 };
 
-exports.fillStats = function (self) {
+exports.fillStats = function (newDate) {
 
   var team = {
     oldstats: {}
@@ -257,7 +255,7 @@ exports.fillStats = function (self) {
           playerObj = {};
         }
 
-        return updateRecord(self);
+        return updateRecord(newDate);
       });
     });
   });
@@ -266,8 +264,10 @@ exports.fillStats = function (self) {
 exports.updateRecord = updateRecord = function (newDate) {
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
 
-  if (!newDate.date) {
+  if (typeof newDate === 'string') {
     newDate = timeToHuman(newDate);
+  } else {
+    newDate = newDate.date;
   }
 
   return request({uri: teamRecord}, function (err, response, recordBody) {
@@ -290,10 +290,11 @@ exports.updateRecord = updateRecord = function (newDate) {
           wins: record[0],
           losses: record[1],
           otl: record[2],
-          date: newDate.date
+          date: newDate
         }], function (err, team) {
-          if (err) { return console.log(err); }
-          return console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);
+          if (err) { console.log(err); }
+          console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);
+          return db.close();
         });
       });
     });

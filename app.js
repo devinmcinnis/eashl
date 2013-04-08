@@ -15,22 +15,17 @@ var express  = require('express')
 
 app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {
-      var cb = function(err, item) {
-        if (err) { console.log(err); }
-        if (item) { console.log(item); }
-      }
-
       return db.load('models/models', function (err, item) {
-        cb(err, item);
+        if (err) { return console.log(err); }
 
         var Oldstats  = db.models.oldstats;
         var Record    = db.models.records;
 
         // If "oldstats" table has nothing inside of it, get the current total stats for every player
-        Oldstats.find({}, function (err, count) {
-          cb(err, item);
+        return Oldstats.find({}, function (err, count) {
+          if (err) { return console.log(err); }
           if (count.length < 1) {
-            routes.fillStats();
+            return routes.fillStats();
           }
         });
       });
@@ -57,8 +52,8 @@ app.configure('development', function(){
 // var bloop = new Date();
 // bloop.setSeconds(bloop.getSeconds() + 2);
 
-new cronJob(configs.timer, function(){
-// new cronJob(bloop, function(){
+// new cronJob(configs.timer, function(){
+new cronJob("0 */2 * * * *", function(){
 
   console.log('Checking to see if team has played a game..');
 
@@ -109,6 +104,8 @@ app.get('/player/:id', routes.player);
 app.get('/filloldstatsbecauseifuckedsomethingup', routes.fillStats);
 
 app.get('/whosonline', routes.whosOnline);
+
+app.get('/getmissedstats', routes.getLatestGame);
 
 app.use(function(req, res, next){
   res.status(404);
