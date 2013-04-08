@@ -52,8 +52,8 @@ app.configure('development', function(){
 // var bloop = new Date();
 // bloop.setSeconds(bloop.getSeconds() + 2);
 
-// new cronJob(configs.timer, function(){
-new cronJob("0 */2 * * * *", function(){
+new cronJob(configs.timer, function(){
+// new cronJob("0 */2 * * * *", function(){
 
   console.log('Checking to see if team has played a game..');
 
