@@ -44,7 +44,7 @@ exports.index = function(req, res){
   });
 };
 
-exports.getLatestGame = function () {
+exports.getLatestGame = function (newDate) {
 
   var self = this,
       game_players = [];
@@ -200,13 +200,13 @@ exports.getLatestGame = function () {
           });
         }
         console.log('Stat collection complete.');
-        return exports.fillStats(self['date']);
+        return exports.fillStats(self);
       });
     });
   }
 };
 
-exports.fillStats = function (date) {
+exports.fillStats = function (self) {
 
   var team = {
     oldstats: {}
@@ -257,16 +257,18 @@ exports.fillStats = function (date) {
           playerObj = {};
         }
 
-        return updateRecord(date);
+        return updateRecord(self);
       });
     });
   });
 }
 
-exports.updateRecord = updateRecord = function (date) {
+exports.updateRecord = updateRecord = function (newDate) {
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
 
-  if (typeof parseInt(date,10) === 'number' ) { date = timeToHuman(date); }
+  if (!newDate.date) {
+    newDate = timeToHuman(newDate);
+  }
 
   return request({uri: teamRecord}, function (err, response, recordBody) {
     if ( err && response.statusCode != 200 ) {console.log('Request error.');}
@@ -288,7 +290,7 @@ exports.updateRecord = updateRecord = function (date) {
           wins: record[0],
           losses: record[1],
           otl: record[2],
-          date: date
+          date: newDate.date
         }], function (err, team) {
           if (err) { return console.log(err); }
           return console.log('Created new record of '+record[0]+'-'+record[1]+'-'+record[2]);

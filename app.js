@@ -83,7 +83,6 @@ new cronJob(configs.timer, function(){
           var Record = db.models.records;
 
           return Record.find({team_id: 224}, ['date', 'Z'], 1, function (err, lastGame) {
-            console.log(lastGame[0].date.toString(), time.toString());
             if (lastGame.length > 0 && lastGame[0].date.toString() === time.toString()) {
               return console.log('Team has not played a game since ' + time);
             } else if (lastGame.length > 0) {
