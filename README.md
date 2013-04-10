@@ -1,7 +1,7 @@
 #eashl-stat-tracker
 =====
 
-EA doesn't do a detailed job of keeping track of player stats so here's something that will hopefully help out a bit.
+EA doesn't do a detailed job of keeping track of player stats, so here's something that will hopefully help out a bit.
 
 ## Install
 
