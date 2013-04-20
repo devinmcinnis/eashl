@@ -263,8 +263,7 @@ exports.fillStats = function (newDate) {
 
 exports.updateRecord = updateRecord = function (newDate) {
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
-console.log(newDate);
-console.log(typeof newDate);
+
   if ( newDate === 'undefined' ) {
     return false;
   } else if (typeof newDate === 'string') {
@@ -301,6 +300,26 @@ console.log(typeof newDate);
         });
       });
     });
+  });
+}
+
+exports.getLastGameTime = function (req, res) {
+  var lastGameTime = 'http://www.easportsworld.com/p/easw/a/easwclub/s/gs/blaze/401A0001/clubs/findClubs?cfli%7C=1&cfli%7C0=224&clti=1&mxrc=1';
+
+  request({uri: lastGameTime}, function (err, response, timeBody) {
+    if ( err && response.statusCode != 200 ) {console.log('Request error.');}
+
+    parseString(timeBody, {trim: true}, function (err, timeXML) {
+
+      function convertTime(time) {
+        var theDate = new Date(time * 1000);
+        return theDate;
+      }
+
+      var time = convertTime(timeXML.findclubs.clublist[0].club[0].clubinfo[0].lastgametime[0]);
+      return time;
+    });
+
   });
 }
 

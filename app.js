@@ -25,7 +25,7 @@ app.use(orm.express(configs.postgres.url, {
         return Oldstats.find({}, function (err, count) {
           if (err) { return console.log(err); }
           if (count.length < 1) {
-            return routes.fillStats();
+            return routes.fillStats(routes.getLastGameTime);
           }
         });
       });
