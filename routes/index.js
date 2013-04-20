@@ -263,7 +263,7 @@ exports.fillStats = function (newDate) {
 
 exports.updateRecord = updateRecord = function (newDate) {
   var teamRecord = 'http://www.easportsworld.com/en_US/clubs/401A0001/224/overview';
-
+console.log(newDate)
   if (typeof newDate === 'string') {
     newDate = timeToHuman(newDate);
   } else {
