@@ -26,11 +26,12 @@ exports.player = function (req, res) {
   return orm.connect(configs.postgres.url, function (err, db) {
     db.load('./models/models', function (err) {
       var stats = db.models.stats;
-      stats.find({name: req.params.id}, ['date_played', 'Z'], function (err, stat) {
-        res.render('player', {
+      return stats.find({name: req.params.id}, ['date_played', 'Z'], function (err, stat) {
+        return res.render('player', {
           title: req.params.id,
           stats: stat,
-          playername: req.params.id
+          playername: req.params.id,
+          timezone: req.cookies.timezone
         });
       });
     });
