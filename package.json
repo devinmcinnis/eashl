@@ -24,6 +24,7 @@
     "inflector" : "0.0.1"
   },
   "devDependencies": {
+    "coffee-script" : "1.6.2",
     "nodemon" : "~0.7.1"
   }
 }

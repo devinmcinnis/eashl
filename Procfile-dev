@@ -1,2 +1,3 @@
 web: ./node_modules/.bin/nodemon app.js
 stylus: ./node_modules/.bin/stylus --use nib --compress --watch stylus/main.styl --out public/stylesheets
+coffee: ./node_modules/.bin/coffee --watch --compile --output ./public/javascripts coffee
