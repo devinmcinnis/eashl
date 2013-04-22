@@ -2,10 +2,33 @@ doctype 5
 html
   head
     title= 'Puck Goes First | ' + title
+    meta(name="viewport", content="width=device-width,initial-scale=1")
     link(rel='stylesheet', href='/stylesheets/main.css')
     link(rel="favicon", href="/images/logo.png")
   body
     h1
       a(href="/")= title
+    ul#menu
+      if (title != 'Terrible Stat Logger')
+        li
+          a(onclick="javascript: history.back()") << Go Back
+        li
+          a.change-timezone Change Timezone
+      else
+        li
+          a.change-timezone Change Timezone
     img.team-logo(src="/images/logo.png")
+    #timezone
+      .center
+        p Select Timezone
+        ul
+          li(data-time="4") Atlantic Standard Time (UTC-4)
+          li(data-time="5") Eastern Standard Time (UTC-5)
+          li(data-time="6") Central Standard Time (UTC-6)
+          li(data-time="7") Mountain Standard Time (UTC-7)
+          li(data-time="8") Pacific Standard Time (UTC-8)
     block content
+
+    script(src="/javascripts/jquery.min.js")
+    script(src="/javascripts/jquery.cookie.js")
+    script(src="/javascripts/pgf.js")
