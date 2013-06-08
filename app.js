@@ -104,7 +104,7 @@ app.get('/player/:id', routes.player);
 
 app.get('/filloldstatsbecauseifuckedsomethingup', routes.fillStats);
 
-app.get('/whosonline', routes.whosOnline);
+// app.get('/whosonline', routes.whosOnline);
 
 app.get('/getmissedstats', routes.getLatestGame);
 
