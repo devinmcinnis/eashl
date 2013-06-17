@@ -15,7 +15,7 @@ var express  = require('express')
 
 app.use(orm.express(configs.postgres.url, {
     define: function (db, models) {
-      return db.load('models/models', function (err, item) {
+      return db.load('./models/models', function (err, item) {
         if (err) { return console.log(err); }
 
         var Oldstats  = db.models.oldstats;
