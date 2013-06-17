@@ -24,7 +24,7 @@ exports.player = function (req, res) {
   var player = [];
 
   return orm.connect(configs.postgres.url, function (err, db) {
-    db.load('../models/models', function (err) {
+    db.load('./models/models', function (err) {
       var stats = db.models.stats;
       return stats.find({name: req.params.id}, ['date_played', 'Z'], function (err, stat) {
         return res.render('player', {
@@ -162,7 +162,7 @@ exports.getLatestGame = function (newDate) {
     // console.log('Results of the last game played:')
 
     orm.connect(configs.postgres.url, function (err, db) {
-      db.load('../models/models', function (err) {
+      db.load('./models/models', function (err) {
         if (err) console.log(err);
 
         var oldstat = db.models.oldstats;
@@ -235,7 +235,7 @@ exports.fillStats = function (newDate) {
     });
 
     return orm.connect(configs.postgres.url, function(err, db) {
-      return db.load('../models/models', function (err) {
+      return db.load('./models/models', function (err) {
         if (err) console.log(err);
 
         var oldstat = db.models.oldstats;
@@ -281,7 +281,7 @@ exports.updateRecord = updateRecord = function (newDate) {
     record = $body.find('tr.strong > td:nth-child(2) span.black').text().split(' - ');
 
     return orm.connect(configs.postgres.url, function(err, db) {
-      return db.load('../models/models', function (err) {
+      return db.load('./models/models', function (err) {
         if (err) console.log(err);
 
         // Update records tables in database
