@@ -12,7 +12,7 @@ EA doesn't do a detailed job of keeping track of player stats, so here's somethi
     npm install
     npm install foreman -g
 
-### Setting up PostgreSQL
+### Setting up PostgreSQL on Linux
     sudo apt-get postgresql
     sudo su postgres
     psql

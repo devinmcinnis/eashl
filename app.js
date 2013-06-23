@@ -70,7 +70,8 @@ new cronJob(configs.timer, function(){
         return theDate;
       }
 
-      var time = convertTime(timeXML.findclubs.clublist[0].club[0].clubinfo[0].lastgametime[0]);
+      var time = convertTime(timeXML.findclubs.clublist[0].club[0].clubinfo[0].lastgametime);
+      console.log(time);
 
       return orm.connect(configs.postgres.url, function(err, db) {
         return db.load('./models/models', function (err) {
