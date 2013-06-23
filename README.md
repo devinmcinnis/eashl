@@ -1,6 +1,10 @@
 #eashl-stat-tracker
 =====
 
+```
+Notice: Seems like EA is cutting off requests for their XML docs through IPs and this logger has become broken in the process.
+```
+
 EA doesn't do a detailed job of keeping track of player stats, so here's something that will hopefully help out a bit.
 
 ## Install

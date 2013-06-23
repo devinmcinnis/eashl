@@ -61,7 +61,11 @@ new cronJob(configs.timer, function(){
   var lastGameTime = 'http://www.easportsworld.com/p/easw/a/easwclub/s/gs/blaze/401A0001/clubs/findClubs?cfli%7C=1&cfli%7C0=224&clti=1&mxrc=1';
 
   request({uri: lastGameTime}, function (err, response, timeBody) {
-    if ( err && response.statusCode != 200 ) {console.log('Request error.');}
+
+    if ( response.statusCode != 200 ) {
+      console.log('REQUEST ERROR: ' + response.statusCode);
+      return console.log(response.body)
+    }
 
     parseString(timeBody, {trim: true}, function (err, timeXML) {
 
@@ -71,7 +75,6 @@ new cronJob(configs.timer, function(){
       }
 
       var time = convertTime(timeXML.findclubs.clublist[0].club[0].clubinfo[0].lastgametime);
-      console.log(time);
 
       return orm.connect(configs.postgres.url, function(err, db) {
         return db.load('./models/models', function (err) {
